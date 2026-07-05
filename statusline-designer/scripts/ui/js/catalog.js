@@ -1,4 +1,4 @@
-/* Status Bar Composer — data catalog.
+/* Status Bar Composer - data catalog.
    Segment definitions mirror generate.py exactly: every id, mode, flag and color
    here has a counterpart in the generator, so what the preview shows is what the
    terminal gets. */

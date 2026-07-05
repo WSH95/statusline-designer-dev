@@ -1,4 +1,4 @@
-/* Status Bar Composer — terminal preview renderer.
+/* Status Bar Composer - terminal preview renderer.
    A faithful port of the generated script's rendering rules (generate.py):
    same separator handling, emoji map, gradient math, desaturation, emphasis
    and link styling, so the preview pixel-matches the real terminal output. */

@@ -1,4 +1,4 @@
-/* Status Bar Composer — application state, card faces, dock, panel, actions.
+/* Status Bar Composer - application state, card faces, dock, panel, actions.
    State shape and the exported choice.json match the v3 designer exactly, so
    generate.py / apply_settings.py consume it unchanged; palette + clock are
    strictly additive. */
@@ -516,7 +516,7 @@ window.SBC = window.SBC || {};
     const ids = () => S.lineIds(state, st.line);
     const setPos = () => {
       const list = ids();
-      pos.textContent = st.on ? (list.indexOf(id) + 1) + " of " + list.length : "–";
+      pos.textContent = st.on ? (list.indexOf(id) + 1) + " of " + list.length : "-";
     };
     setPos();
     const move = (dir) => {
@@ -795,7 +795,7 @@ window.SBC = window.SBC || {};
       const pos = row.querySelector(".st-val");
       if (pos) {
         const list = S.lineIds(state, st.line);
-        pos.textContent = st.on ? (list.indexOf(id) + 1) + " of " + list.length : "–";
+        pos.textContent = st.on ? (list.indexOf(id) + 1) + " of " + list.length : "-";
       }
     });
   }
@@ -843,6 +843,11 @@ window.SBC = window.SBC || {};
       if (i > 0) hash[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1));
     });
     if (hash.theme === "dark" || hash.theme === "light") document.documentElement.dataset.theme = hash.theme;
+    if (hash.preset) {
+      const p = S.PRESETS.find((x) => x.id === hash.preset);
+      if (p) applyPreset(p);
+    }
+    if (hash.palette && S.PALETTES[hash.palette]) state.palette = hash.palette;
     let start = 0;
     if (hash.card != null) {
       const byId = S.CARDMAP[hash.card];

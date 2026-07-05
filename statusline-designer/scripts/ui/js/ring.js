@@ -1,7 +1,7 @@
-/* Status Bar Composer — 3D card ring.
+/* Status Bar Composer - 3D card ring.
    Cards sit on a cylinder (rotateY(i·step) translateZ(R)); the ring container
    counter-rotates so the focused card faces the viewer. Focus changes by
-   click / drag / arrow keys / dots — hover only lifts (user's choice).
+   click / drag / arrow keys / dots - hover only lifts (user's choice).
    Falls back to a flat scroll-snap strip under 960px and honors
    prefers-reduced-motion (no inertia, no parallax). */
 window.SBC = window.SBC || {};
