@@ -32,6 +32,9 @@ Development home of the statusline-designer Claude Code skill: a macOS-style 'St
 
 ## Constraints
 
+- Cross-platform: the skill must work on Ubuntu, Windows, and macOS (dev host is
+  Ubuntu). Font stacks cover all three (incl. emoji fonts); no `/tmp` hardcoding in
+  generated scripts (`tempfile.gettempdir()`); paths via `os.path` only.
 - The skill must run anywhere with python3 stdlib only: no build step, no npm, no
   external network requests from the UI (vanilla HTML/CSS/JS served by `server.py`).
 - Preserve the choice.json contract consumed by `generate.py` / `apply_settings.py`;
