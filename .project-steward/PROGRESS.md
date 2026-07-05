@@ -2,6 +2,16 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-05T23:20Z — iteration 2 shipped (full-bleed rework per user review)
+User rejected round 1 as too literal a mock copy (framed window, small text,
+blurry 3D, weak drama, wrong arrows). Rebuilt: full-bleed off-white page, no
+app chrome, 14px base / 300x380 cards / 820px terminal, slot-based coverflow
+(focused card + terminal on 2D transforms = crisp; 42deg turns; opacity+veil
+depth, zero blur filters), rAF-driven motion, perspective-origin parallax,
+edge chevron arrows, displacement-based side-card clicks. verify.sh 26/26,
+round-trip intact, focused card measured at exactly 300px (no upscale).
+Awaiting user re-review on :8899.
+
 ### 2026-07-05T22:40Z — [auto-checkpoint] handoff refreshed
 Build+verify complete, review server live on :8899, waiter armed on sandbox
 choice.json; HANDOFF.md rewritten for the review-in-progress state.
