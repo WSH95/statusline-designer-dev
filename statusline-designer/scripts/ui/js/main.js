@@ -196,6 +196,8 @@ window.SBC = window.SBC || {};
     cardEl.innerHTML = "";
     cardEl.style.setProperty("--ci", TINT[card.id] || "#0a84ff");
     cardEl.dataset.card = card.id;
+    const lift = el("div", "card-lift");   // hover lift lives here, apart from the 3D transform
+    cardEl.appendChild(lift);
 
     const head = el("div", "card-head");
     head.appendChild(el("span", "card-icon", S.ICONS[card.icon] || ""));
@@ -206,10 +208,10 @@ window.SBC = window.SBC || {};
         state.seg[hero.id].on = v; touchOrder(hero.id); syncCard(card); render();
       }));
     }
-    cardEl.appendChild(head);
+    lift.appendChild(head);
 
     const body = el("div", "card-body");
-    cardEl.appendChild(body);
+    lift.appendChild(body);
 
     if (card.kind === "theme") return buildThemeFace(body);
     if (card.kind === "layout") return buildLayoutFace(body);
@@ -612,7 +614,7 @@ window.SBC = window.SBC || {};
     wrap.appendChild(el("div", "pop-title", "Getting around"));
     const list = el("div", "help-list");
     [
-      ["Rotate the ring", "drag, or <kbd>←</kbd> <kbd>→</kbd>"],
+      ["Rotate the cards", "drag, side arrows, or <kbd>←</kbd> <kbd>→</kbd>"],
       ["Focus a card", "click it, or a dot"],
       ["Jump to a field's card", "click it in the preview"],
       ["Reorder fields", "drag the chips below the preview"],
@@ -789,7 +791,7 @@ window.SBC = window.SBC || {};
       if (pill) {
         pill.textContent = "";
         if (st.on) pill.appendChild(S.segSpan(id, state));
-        else { const off = el("span"); off.textContent = "hidden"; off.style.color = "#565f89"; pill.appendChild(off); }
+        else { const off = el("span"); off.textContent = "off"; off.style.color = "#565f89"; pill.appendChild(off); }
       }
       const pos = row.querySelector(".st-val");
       if (pos) {
@@ -876,19 +878,18 @@ window.SBC = window.SBC || {};
         render();
       },
     });
+    S.ring.bindFlatClicks();
     render();
 
     // headless QA: #debug=1 appends live geometry numbers to the DOM
     if (hash.debug != null) {
       (() => {
-        const ringN = $("ring"), sceneN = $("scene"), stageN = $("stage");
-        const winN = document.querySelector(".window");
+        const ringN = $("ring");
         const meas = () => {
           const a = ringN.children[0].getBoundingClientRect();
           const b = ringN.children[1].getBoundingClientRect();
           return "c0 x" + Math.round(a.x) + " w" + Math.round(a.width) + " | c1 x" + Math.round(b.x) + " w" + Math.round(b.width);
         };
-        void sceneN; void stageN; void winN;
         const out = { w: innerWidth, cards: meas(), choice: buildChoice() };
         const dbg = el("pre");
         dbg.id = "dbg";

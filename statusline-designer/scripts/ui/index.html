@@ -16,78 +16,71 @@
 </script>
 </head>
 <body>
-<div class="window">
 
-  <header class="titlebar">
-    <div class="traffic" aria-hidden="true"><i class="tl tl-r"></i><i class="tl tl-y"></i><i class="tl tl-g"></i></div>
-    <h1 class="app-title">Status Bar Composer</h1>
-    <div class="tb-actions">
-      <button id="helpBtn" class="icon-btn" type="button" aria-label="Gestures and shortcuts" aria-haspopup="dialog"></button>
-      <div class="menu-anchor">
-        <button id="presetsBtn" class="soft-btn" type="button" aria-haspopup="menu" aria-expanded="false">Presets<span class="chev" aria-hidden="true"></span></button>
-        <div id="presetsMenu" class="menu" role="menu" hidden></div>
-      </div>
-      <button id="themeBtn" class="icon-btn" type="button" aria-label="Switch between light and dark appearance"></button>
-      <button id="applyBtn" class="primary-btn" type="button">Apply to Terminal</button>
+<header class="toolbar">
+  <h1 class="app-title">Status Bar Composer</h1>
+  <div class="tb-actions">
+    <span id="applyStatus" class="apply-status" role="status" aria-live="polite"></span>
+    <button id="helpBtn" class="icon-btn" type="button" aria-label="Gestures and shortcuts" aria-haspopup="dialog"></button>
+    <div class="menu-anchor">
+      <button id="presetsBtn" class="soft-btn" type="button" aria-haspopup="menu" aria-expanded="false">Presets<span class="chev" aria-hidden="true"></span></button>
+      <div id="presetsMenu" class="menu" role="menu" hidden></div>
     </div>
-  </header>
+    <button id="themeBtn" class="icon-btn" type="button" aria-label="Switch between light and dark appearance"></button>
+    <button id="applyBtn" class="primary-btn" type="button">Apply to Terminal</button>
+  </div>
+</header>
 
-  <nav class="navstrip" aria-label="Card navigation">
-    <div class="nav-row">
-      <button id="prevBtn" class="nav-arrow" type="button" aria-label="Previous card"></button>
-      <div id="dots" class="dots" role="group" aria-label="Cards"></div>
-      <button id="nextBtn" class="nav-arrow" type="button" aria-label="Next card"></button>
+<main class="stage" id="stage">
+  <section class="terminal" aria-label="Live preview of your status line">
+    <div class="term-chrome">
+      <span class="traffic" aria-hidden="true"><i class="tl tl-r"></i><i class="tl tl-y"></i><i class="tl tl-g"></i></span>
+      <span class="term-title" id="termTitle">terminal</span>
+      <span class="live-dot" title="Preview updates live"></span>
     </div>
-    <p class="nav-hint" id="navHint">Drag or use <kbd>←</kbd> <kbd>→</kbd> to rotate</p>
-  </nav>
+    <div class="term-body">
+      <div class="term-prompt" id="termPrompt"></div>
+      <div class="term-status" id="termStatus"></div>
+    </div>
+  </section>
 
-  <main class="stage" id="stage">
-    <div class="pedestal" aria-hidden="true"></div>
+  <div class="carousel-band" id="band">
+    <div class="floor" aria-hidden="true"></div>
     <div class="scene" id="scene">
       <div class="ring" id="ring"></div>
-      <section class="terminal" aria-label="Live preview of your status line">
-        <div class="term-chrome">
-          <span class="traffic traffic-mini" aria-hidden="true"><i class="tl tl-r"></i><i class="tl tl-y"></i><i class="tl tl-g"></i></span>
-          <span class="term-title" id="termTitle">terminal</span>
-          <span class="live-dot" title="Preview updates live"></span>
-        </div>
-        <div class="term-body">
-          <div class="term-prompt" id="termPrompt"></div>
-          <div class="term-status" id="termStatus"></div>
-        </div>
-      </section>
     </div>
-  </main>
+    <button id="prevBtn" class="edge-arrow edge-left" type="button" aria-label="Previous card"></button>
+    <button id="nextBtn" class="edge-arrow edge-right" type="button" aria-label="Next card"></button>
+  </div>
 
-  <section class="dock" id="dock" aria-label="Field order">
-    <div class="dock-row">
-      <span class="dock-tag" id="dockTag1">Line 1</span>
-      <div class="dock-lane" id="lane1" data-line="1" aria-label="Line 1 fields"></div>
-    </div>
-    <div class="dock-row">
-      <span class="dock-tag">Line 2</span>
-      <div class="dock-lane" id="lane2" data-line="2" aria-label="Line 2 fields"></div>
-    </div>
-  </section>
+  <div id="dots" class="dots" role="group" aria-label="Cards"></div>
+</main>
 
-  <section class="panel" aria-label="Focused card details" id="panel">
-    <div class="panel-id">
-      <span class="panel-icon" id="panelIcon" aria-hidden="true"></span>
-      <div class="panel-heading">
-        <h2 id="panelName"></h2>
-        <p id="panelBlurb"></p>
-      </div>
-    </div>
-    <div class="panel-segs" id="panelSegs"></div>
-  </section>
+<section class="dock" id="dock" aria-label="Field order">
+  <div class="dock-row">
+    <span class="dock-tag">Line 1</span>
+    <div class="dock-lane" id="lane1" data-line="1" aria-label="Line 1 fields"></div>
+  </div>
+  <div class="dock-row">
+    <span class="dock-tag">Line 2</span>
+    <div class="dock-lane" id="lane2" data-line="2" aria-label="Line 2 fields"></div>
+  </div>
+</section>
 
-  <footer class="footbar">
+<section class="panel" aria-label="Focused card details" id="panel">
+  <div class="panel-id">
+    <span class="panel-icon" id="panelIcon" aria-hidden="true"></span>
+    <div class="panel-heading">
+      <h2 id="panelName"></h2>
+      <p id="panelBlurb"></p>
+    </div>
+  </div>
+  <div class="panel-segs" id="panelSegs"></div>
+  <div class="panel-actions">
     <button id="resetBtn" class="soft-btn" type="button"><span class="btn-ic" data-icon="reset"></span>Reset All</button>
-    <span class="foot-status" id="applyStatus" role="status" aria-live="polite"></span>
     <button id="exportBtn" class="soft-btn" type="button"><span class="btn-ic" data-icon="export"></span>Export</button>
-  </footer>
-
-</div>
+  </div>
+</section>
 
 <div id="popover" class="popover" hidden></div>
 <div id="scrim" class="scrim" hidden></div>
