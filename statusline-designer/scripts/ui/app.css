@@ -200,10 +200,10 @@ svg { display: block; width: 100%; height: 100%; }
 /* ---------- navstrip ---------- */
 .navstrip {
   flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  padding: 9px 0 3px;
-  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 0 0;
 }
+.nav-row { display: flex; align-items: center; gap: 12px; }
 .nav-arrow {
   width: 28px; height: 28px; border-radius: 50%;
   background: var(--card); box-shadow: inset 0 0 0 1px var(--card-line), 0 0 0 1px var(--card-edge), 0 2px 8px rgba(20, 28, 44, .10);
@@ -220,10 +220,9 @@ svg { display: block; width: 100%; height: 100%; }
   transition: width .25s var(--ease-pop), background .2s, opacity .2s;
 }
 .dot:hover { opacity: .9; }
-.dot[aria-selected="true"] { width: 20px; background: var(--accent); opacity: 1; }
+.dot[aria-pressed="true"] { width: 20px; background: var(--accent); opacity: 1; }
 .nav-hint {
-  position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
-  font-size: 11px; color: var(--ink3); display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--ink2); display: flex; align-items: center; gap: 4px;
 }
 
 /* ---------- stage & 3D scene ---------- */
@@ -475,7 +474,7 @@ svg { display: block; width: 100%; height: 100%; }
   border-top: 1px solid var(--hair);
 }
 .dock-row { display: flex; align-items: center; gap: 10px; }
-.dock-tag { flex: 0 0 44px; font-size: 10px; font-weight: 600; letter-spacing: .04em; color: var(--ink3); text-transform: uppercase; }
+.dock-tag { flex: 0 0 44px; font-size: 10px; font-weight: 600; letter-spacing: .04em; color: var(--ink2); text-transform: uppercase; }
 .dock-lane {
   flex: 1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   min-height: 30px; padding: 3px 6px;
@@ -483,7 +482,7 @@ svg { display: block; width: 100%; height: 100%; }
   transition: background .15s, box-shadow .15s;
 }
 .dock-lane.over { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); }
-.dock-empty { font-size: 11px; color: var(--ink3); padding-left: 4px; }
+.dock-empty { font-size: 11px; color: var(--ink2); padding-left: 4px; }
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 3px 10px 3px 7px; border-radius: var(--r-pill);

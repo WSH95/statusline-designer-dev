@@ -736,16 +736,15 @@ window.SBC = window.SBC || {};
     S.CARDS.forEach((c, i) => {
       const d = el("button", "dot");
       d.type = "button";
-      d.setAttribute("role", "tab");
       d.setAttribute("aria-label", c.name);
-      d.setAttribute("aria-selected", "false");
+      d.setAttribute("aria-pressed", "false");
       d.title = c.name;
       d.addEventListener("click", () => S.ring.goTo(i));
       dots.appendChild(d);
     });
   }
   function syncDots() {
-    Array.from($("dots").children).forEach((d, i) => d.setAttribute("aria-selected", String(i === focusedCard)));
+    Array.from($("dots").children).forEach((d, i) => d.setAttribute("aria-pressed", String(i === focusedCard)));
   }
 
   /* ---------- render ---------- */

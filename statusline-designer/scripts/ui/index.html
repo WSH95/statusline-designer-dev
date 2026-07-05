@@ -33,9 +33,11 @@
   </header>
 
   <nav class="navstrip" aria-label="Card navigation">
-    <button id="prevBtn" class="nav-arrow" type="button" aria-label="Previous card"></button>
-    <div id="dots" class="dots" role="tablist" aria-label="Cards"></div>
-    <button id="nextBtn" class="nav-arrow" type="button" aria-label="Next card"></button>
+    <div class="nav-row">
+      <button id="prevBtn" class="nav-arrow" type="button" aria-label="Previous card"></button>
+      <div id="dots" class="dots" role="group" aria-label="Cards"></div>
+      <button id="nextBtn" class="nav-arrow" type="button" aria-label="Next card"></button>
+    </div>
     <p class="nav-hint" id="navHint">Drag or use <kbd>←</kbd> <kbd>→</kbd> to rotate</p>
   </nav>
 
