@@ -1,9 +1,9 @@
 ---
-updated_at: 2026-07-05T22:40Z
+updated_at: 2026-07-05T23:35Z
 updated_by: claude (auto-checkpoint)
 session_status: active
 branch: main
-last_commit: 0f26a7e chore(steward): checkpoint - build+verify done, user review next
+last_commit: ab57775 feat(ui): iteration 2 - full-bleed rework (+ steward log commit after)
 ---
 
 # Handoff
@@ -13,29 +13,28 @@ another device). Keep every section current at wrap-up.
 
 ## Now
 
-Status Bar Composer fully built in `statusline-designer/` (drop-in replacement
-for `~/.claude/skills/statusline-designer`). `dev/verify.sh` green (26/26),
-6 commits on main. Waiting on the user's visual review.
+Iteration 2 (full-bleed rework per user's design review) shipped and verified:
+crisp slot-based coverflow, no app chrome, larger scale, edge arrows.
+`dev/verify.sh` 26/26. User's first browser Apply already round-tripped through
+generate.py successfully (they edited: line 2 ends with `lines` now, not
+`cost`). Awaiting the user's verdict on iteration 2.
 
 ## In flight
 
 - User review session: sandboxed server on **http://localhost:8899**
-  (`STATUSLINE_DATA_DIR=<scratchpad>/sandbox/data`, seeded with a copy of the
-  user's real `choice-applied.json`). Two background jobs: the server
-  (task byvpw2q0x) and a waiter on the sandbox `choice.json` (task bfwutxya0)
-  that fires when the user clicks Apply.
+  (`STATUSLINE_DATA_DIR=<scratchpad>/sandbox/data`). Background jobs: server
+  (task byvpw2q0x) and a re-armed Apply-waiter (task b5tc7h04o).
 
 ## Next steps
 
-1. Collect user feedback on the live UI (drag feel, popovers, presets menu are
-   the parts not coverable headlessly); iterate.
+1. Iterate on any remaining iteration-2 feedback.
 2. On approval: final commit, then (explicit go-ahead only) copy
    `statusline-designer/` over `~/.claude/skills/statusline-designer`.
 3. Optional, default-skip: skill-creator description-optimization loop.
 
 ## Blockers
 
-- Awaiting user input (review feedback).
+- Awaiting user input (iteration-2 review verdict).
 
 ## Key files
 

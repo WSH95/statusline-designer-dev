@@ -2,6 +2,8 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-05T23:35Z — [auto-checkpoint] iteration 2 delivered; user's sandbox Apply verified end-to-end; handoff refreshed
+
 ### 2026-07-05T23:20Z — iteration 2 shipped (full-bleed rework per user review)
 User rejected round 1 as too literal a mock copy (framed window, small text,
 blurry 3D, weak drama, wrong arrows). Rebuilt: full-bleed off-white page, no
