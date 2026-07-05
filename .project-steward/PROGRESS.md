@@ -2,6 +2,10 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-05T22:40Z — [auto-checkpoint] handoff refreshed
+Build+verify complete, review server live on :8899, waiter armed on sandbox
+choice.json; HANDOFF.md rewritten for the review-in-progress state.
+
 ### 2026-07-05T22:30Z — composer built and verified; awaiting user review
 Full Status Bar Composer implemented in `statusline-designer/` (drop-in):
 rewritten server.py (static ui/ + BOOT injection, same contract), 4-file
