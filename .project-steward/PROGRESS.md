@@ -2,6 +2,12 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T06:34Z — session wrap: repo public + README shipped
+Public GitHub repo, a `README.md` (fresh live hero screenshot + ~10s core-tour
+GIF), and `dev/capture_readme_media.py` (reproducible media regenerator) are all
+committed and **pushed**; `origin/main` in sync at `40bb523`. Working tree clean,
+no background processes, `~/.claude` untouched. Session closed.
+
 ### 2026-07-06T06:06Z — dev/capture_readme_media.py (reproducible README media)
 Promoted the throwaway capture driver into `dev/capture_readme_media.py`: one
 path-clean, sandboxed command that regenerates both `docs/` assets after a UI
