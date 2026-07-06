@@ -2,6 +2,23 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T05:54Z — public GitHub repo + README (hero image + demo GIF)
+Published the repo public as `WSH95/statusline-designer-dev` and added
+`README.md`. It leads with a fresh live screenshot of the *shipped* UI (the
+repo's `statusline-designer-ui.png` is the older concept mockup — removed
+bottom panel / "Save" button — so it was not reused) and a ~10s "core tour"
+GIF: rotate the ring → focus a card → toggle Session cost + Lines changed so
+line 2 appears live in the preview → light/dark flip. Media committed under
+`docs/`. Capture was fully headless and sandboxed (`STATUSLINE_DATA_DIR` temp
+dir, alt port 8793; `~/.claude` untouched): hero via `google-chrome
+--headless --screenshot` at the `#preset=pictured&theme=light` deep link; GIF
+via a throwaway stdlib CDP driver that drove `SBC.ring.goTo` / DOM toggles /
+`themeBtn` over a raw websocket, frames encoded with ffmpeg. Gotchas for
+successors: `urllib` to `127.0.0.1` ignores the CIDR `no_proxy` and gets a
+502 from the proxy — build a direct `ProxyHandler({})` opener; and never
+`pkill -f` a plain port/pattern that appears in the killing shell's own argv
+(it self-terminates the shell).
+
 ### 2026-07-06T05:00Z — iteration 4 (parting fixes)
 Context Window card foot misalignment fixed: preview strips are now 38px
 flex-centered (block bar glyphs inflated the line box in fallback mono
