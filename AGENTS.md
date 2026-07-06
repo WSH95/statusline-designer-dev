@@ -34,6 +34,7 @@ Primary language/stack: Python 3 (stdlib server + generators) and vanilla HTML/C
 | Build | `(none - no build step; vanilla JS served by python3)` |
 | Test | `bash dev/verify.sh` |
 | Lint | `(none)` |
+| README media | `python3 dev/capture_readme_media.py` |
 <!-- PROJECT-STEWARD:END commands -->
 
 <!-- PROJECT-STEWARD:BEGIN task-backend -->

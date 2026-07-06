@@ -2,6 +2,11 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T06:41Z — AGENTS.md Commands: add README-media regen
+Listed `python3 dev/capture_readme_media.py` in the AGENTS.md Commands managed
+block (guardrail: diff shown + approved; recorded as DECISIONS 0002). README/docs
+stay out of AGENTS.md (instructions, not a log).
+
 ### 2026-07-06T06:34Z — session wrap: repo public + README shipped
 Public GitHub repo, a `README.md` (fresh live hero screenshot + ~10s core-tour
 GIF), and `dev/capture_readme_media.py` (reproducible media regenerator) are all

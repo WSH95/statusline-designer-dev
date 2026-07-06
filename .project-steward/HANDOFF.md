@@ -1,9 +1,9 @@
 ---
-updated_at: 2026-07-06T06:34:40Z
+updated_at: 2026-07-06T06:41:00Z
 updated_by: claude
 session_status: closed
 branch: main
-last_commit: 40bb523 chore(dev): add dev/capture_readme_media.py to regenerate README media
+last_commit: 169d75c chore(steward): session wrap - repo public + README + capture script shipped
 ---
 # Handoff
 
