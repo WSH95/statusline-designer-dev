@@ -2,6 +2,17 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T04:27:46Z — cli
+Status Bar Composer delivered: 3 design iterations, installed to ~/.claude/skills, user's live status line regenerated through the new pipeline; verify 26/26
+
+### 2026-07-06T01:05Z — session wrap: project delivered
+User's real Apply completed the loop: generate.py + apply_settings.py ran
+against the live config and the terminal status line now renders the new
+design. All 12 session tasks closed; verify 26/26; designer server and
+waiters shut down (skill self-starts on next invocation). Remaining ideas
+live in PLAN.md "Later" (Codex = separate skill/branch; optional description
+optimization). Repo and installed skill are in sync at 146a665 + wrap commit.
+
 ### 2026-07-06T00:40Z — [auto-checkpoint] iteration 3 shipped + skill installed for real; server on :8765 with real data dir; waiter armed for the user's first real Apply
 
 ### 2026-07-05T23:35Z — [auto-checkpoint] iteration 2 delivered; user's sandbox Apply verified end-to-end; handoff refreshed
