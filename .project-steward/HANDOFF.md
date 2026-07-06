@@ -1,9 +1,9 @@
 ---
-updated_at: 2026-07-05T23:35Z
+updated_at: 2026-07-06T00:40Z
 updated_by: claude (auto-checkpoint)
 session_status: active
 branch: main
-last_commit: ab57775 feat(ui): iteration 2 - full-bleed rework (+ steward log commit after)
+last_commit: 79f0221 feat(ui): iteration 3 (+ hygiene commit after)
 ---
 
 # Handoff
@@ -13,28 +13,31 @@ another device). Keep every section current at wrap-up.
 
 ## Now
 
-Iteration 2 (full-bleed rework per user's design review) shipped and verified:
-crisp slot-based coverflow, no app chrome, larger scale, edge arrows.
-`dev/verify.sh` 26/26. User's first browser Apply already round-tripped through
-generate.py successfully (they edited: line 2 ends with `lines` now, not
-`cost`). Awaiting the user's verdict on iteration 2.
+Iteration 3 shipped AND **the skill is installed for real** (rsync'd to
+`~/.claude/skills/statusline-designer`, byte-identical, harness picked up the
+new description). Panel removed (weight cycles on cards via name/Aa clicks;
+Export in toolbar; Reset in Presets menu), trackpad horizontal swipe added,
+Codex removed from plans. verify.sh 26/26.
 
 ## In flight
 
-- User review session: sandboxed server on **http://localhost:8899**
-  (`STATUSLINE_DATA_DIR=<scratchpad>/sandbox/data`). Background jobs: server
-  (task byvpw2q0x) and a re-armed Apply-waiter (task b5tc7h04o).
+- **Real** review loop: installed server on **http://localhost:8765** with the
+  real data dir (hydrates the user's actual 13-segment layout, PID via pgrep).
+  Background waiter (task bixxzz989) on `~/.claude/statusline-designer/choice.json`:
+  when the user clicks Apply, run generate.py -> `~/.claude/statusline-command.py`
+  and apply_settings.py -> `~/.claude/settings.json`, then `rm choice.json`
+  (SKILL.md steps 4-5) and confirm to the user.
 
 ## Next steps
 
-1. Iterate on any remaining iteration-2 feedback.
-2. On approval: final commit, then (explicit go-ahead only) copy
-   `statusline-designer/` over `~/.claude/skills/statusline-designer`.
+1. On the waiter firing: complete generate+settings, show rendered line.
+2. Any further design feedback -> edit repo, re-run verify, **re-rsync to the
+   installed copy**, commit.
 3. Optional, default-skip: skill-creator description-optimization loop.
 
 ## Blockers
 
-- Awaiting user input (iteration-2 review verdict).
+- Awaiting user's real Apply / final verdict.
 
 ## Key files
 
@@ -50,10 +53,16 @@ generate.py successfully (they edited: line 2 ends with `lines` now, not
 
 ## Warnings
 
-- Never modify `~/.claude/skills/statusline-designer`, `~/.claude/settings.json`,
-  or `~/.claude/statusline-designer/` during dev; sandbox env vars only.
-- Keep `.ring.boot` transition suppression: without it, headless screenshots
-  freeze mid-transition (looked like a 3D bug; it is not).
+- The install boundary moved (user-approved plan, 2026-07-06): the installed
+  skill and real data dir are now legitimately touched via the SKILL.md
+  workflow. `~/.claude/settings.json` is only written by apply_settings.py
+  after a real user Apply. Keep verify.sh runs sandboxed as before.
+- After any repo edit, re-rsync to `~/.claude/skills/statusline-designer`
+  (`rsync -a --delete`), and keep `__pycache__` out (verify.sh sets
+  PYTHONDONTWRITEBYTECODE).
+- Headless screenshots: add `--force-prefers-reduced-motion` or transitioned
+  properties (active dot, switches) freeze at transition-start under virtual
+  time and look broken when they are not.
 - curl to 127.0.0.1 needs `--noproxy '*'` in this environment.
 - choice.json contract: new keys (`palette`, per-seg `colorHex`, `clock`) are
   strictly optional; legacy layouts must keep round-tripping byte-identically.

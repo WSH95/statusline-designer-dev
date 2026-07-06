@@ -2,6 +2,8 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T00:40Z — [auto-checkpoint] iteration 3 shipped + skill installed for real; server on :8765 with real data dir; waiter armed for the user's first real Apply
+
 ### 2026-07-05T23:35Z — [auto-checkpoint] iteration 2 delivered; user's sandbox Apply verified end-to-end; handoff refreshed
 
 ### 2026-07-05T23:20Z — iteration 2 shipped (full-bleed rework per user review)
