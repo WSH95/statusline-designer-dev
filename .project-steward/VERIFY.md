@@ -36,9 +36,14 @@ Screenshot any UI state via deep links
 
 ```bash
 google-chrome --headless=new --disable-gpu --hide-scrollbars \
+  --force-prefers-reduced-motion \
   --window-size=1440,900 --virtual-time-budget=2500 \
   --screenshot=dev/screenshots/x.png 'http://localhost:8899/#card=lim5h&theme=dark'
 ```
+
+`--force-prefers-reduced-motion` matters: headless virtual time does not advance
+CSS transitions, so without it any transitioned property (active dot, switches)
+screenshots at its transition-start state and looks broken when it is not.
 
 `#debug=1` appends `<pre id="dbg">` with ring geometry plus the exact
 `buildChoice()` payload; used for the hydrate→choice round-trip check.

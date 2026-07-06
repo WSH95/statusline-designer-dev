@@ -27,5 +27,7 @@ holds milestones + a pointer only (never a duplicate task list).
 
 ## Later
 
-- [ ] Codex CLI segment catalog (second target)
 - [ ] Optional: skill-creator description-optimization loop (user chose default skip)
+
+(Codex support removed from this plan 2026-07-06: it will be a separate skill on
+its own branch, since Codex's status-line interface may not match Claude Code's.)

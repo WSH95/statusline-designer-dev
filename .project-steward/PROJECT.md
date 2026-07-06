@@ -20,8 +20,9 @@ Development home of the statusline-designer Claude Code skill: a macOS-style 'St
 
 ## Non-goals
 
-- Codex CLI support (planned later; keep the segment catalog data-driven so a second
-  catalog can be added, but build nothing for it now).
+- Codex CLI support: out of scope for this skill entirely. Codex's status-line
+  interface likely differs from Claude Code's; it will be designed as a separate
+  skill on its own branch later (user decision, 2026-07-06).
 - Design JSON import, per-segment custom hex picker (explicitly deferred by user).
 - New bar rendering styles in the generated script (Display stays Off / Percent / Bar).
 

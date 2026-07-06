@@ -319,9 +319,24 @@ svg { display: block; width: 100%; height: 100%; }
   min-height: 32px;
   font-size: 13.5px;
 }
-.seg-row .rname { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.rname {
+  flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-align: left; font-size: inherit;
+  padding: 3px 7px; margin-left: -7px; border-radius: 7px;
+  transition: background .15s;
+}
+.rname:hover { background: var(--inset); }
 .seg-row.is-off .rname { color: var(--ink2); }
 .rnote { font-size: 11px; color: var(--ink3); }
+
+/* weight chip: shows the current weight on itself, click cycles bold/normal/dim */
+.weight-chip {
+  min-width: 34px; height: 26px; padding: 0 8px; border-radius: 8px;
+  background: var(--inset); font-size: 13px; letter-spacing: .01em;
+  transition: background .15s;
+}
+.weight-chip:hover { background: var(--inset-strong); }
+.opt-ctl { display: inline-flex; align-items: center; gap: 9px; }
 
 /* macOS-style switch */
 .switch { position: relative; display: inline-block; width: 40px; height: 24px; flex: 0 0 auto; }
@@ -417,11 +432,12 @@ svg { display: block; width: 100%; height: 100%; }
 .stepper button:hover { background: var(--surface); color: var(--ink); }
 .stepper .st-val { min-width: 26px; text-align: center; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 
-/* ---------- dock ---------- */
+/* ---------- dock (the page's closing band: order + lines live here) ---------- */
 .dock {
   display: flex; flex-direction: column; gap: 6px;
-  padding: 12px max(24px, 3vw);
+  padding: 14px max(24px, 3vw) 26px;
   border-top: 1px solid var(--hair);
+  background: var(--panel);
 }
 .dock-row { display: flex; align-items: center; gap: 12px; }
 .dock-tag { flex: 0 0 50px; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--ink2); text-transform: uppercase; }
@@ -448,50 +464,8 @@ svg { display: block; width: 100%; height: 100%; }
 .chip.dragging { opacity: .4; }
 .chip .chip-dot { width: 9px; height: 9px; border-radius: 50%; }
 
-/* ---------- detail panel ---------- */
-.panel {
-  display: grid;
-  grid-template-columns: 280px 1fr auto;
-  gap: 6px 26px;
-  padding: 14px max(24px, 3vw) 18px;
-  border-top: 1px solid var(--hair);
-  background: var(--panel);
-  min-height: 132px;
-}
-.panel-id { display: flex; gap: 12px; align-items: flex-start; padding-top: 4px; }
-.panel-icon {
-  width: 40px; height: 40px; border-radius: 12px; flex: 0 0 auto;
-  display: grid; place-items: center;
-  color: var(--ci, var(--accent));
-  background: color-mix(in srgb, var(--ci, var(--accent)) 13%, transparent);
-}
-.panel-icon svg { width: 23px; height: 23px; }
-.panel-heading h2 { font-size: 17px; font-weight: 650; letter-spacing: -.015em; }
-.panel-heading p { font-size: 13px; color: var(--ink2); margin-top: 3px; max-width: 26ch; line-height: 1.45; }
-.panel-segs {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
-  gap: 4px 26px;
-  align-content: start;
-  max-height: 118px; overflow-y: auto;
-  padding-right: 6px;
-}
-.prow {
-  display: flex; align-items: center; gap: 9px;
-  min-height: 34px; font-size: 13px;
-}
-.prow .pname { flex: 0 0 96px; font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prow.is-off .pname { color: var(--ink3); }
-.prow .seg-pill {
-  margin-left: auto;
-  font-family: var(--mono); font-size: 12px;
-  background: #16181d; border-radius: 7px; padding: 3px 9px;
-  max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.prow .mini-select { max-width: 92px; }
-.prow .line-seg { flex: 0 0 auto; width: 70px; }
-.panel-note { font-size: 13px; color: var(--ink2); align-self: center; line-height: 1.55; max-width: 60ch; }
-.panel-actions { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+/* small helper paragraph inside popovers */
+.panel-note { font-size: 13px; color: var(--ink2); line-height: 1.55; max-width: 34ch; }
 
 /* ---------- popover & scrim ---------- */
 .scrim { position: fixed; inset: 0; z-index: 70; }
@@ -531,9 +505,6 @@ svg { display: block; width: 100%; height: 100%; }
   .card::after { display: none; }
   .card.is-aside .card-body, .card.is-aside .card-head { pointer-events: auto; }
   .card.is-aside:hover .card-lift { transform: none; }
-  .panel { grid-template-columns: 1fr; }
-  .panel-segs { max-height: none; }
-  .panel-actions { flex-direction: row; }
 }
 
 /* ---------- accessibility & motion ---------- */
@@ -553,6 +524,6 @@ svg { display: block; width: 100%; height: 100%; }
 }
 
 /* thin scrollbars */
-.panel-segs::-webkit-scrollbar, .ring::-webkit-scrollbar { width: 8px; height: 8px; }
-.panel-segs::-webkit-scrollbar-thumb, .ring::-webkit-scrollbar-thumb { background: var(--inset-strong); border-radius: 4px; }
-.panel-segs::-webkit-scrollbar-track, .ring::-webkit-scrollbar-track { background: transparent; }
+.ring::-webkit-scrollbar { width: 8px; height: 8px; }
+.ring::-webkit-scrollbar-thumb { background: var(--inset-strong); border-radius: 4px; }
+.ring::-webkit-scrollbar-track { background: transparent; }

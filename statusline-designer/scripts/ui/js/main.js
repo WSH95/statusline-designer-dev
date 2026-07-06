@@ -1,4 +1,4 @@
-/* Status Bar Composer - application state, card faces, dock, panel, actions.
+/* Status Bar Composer - application state, card faces, dock, actions.
    State shape and the exported choice.json match the v3 designer exactly, so
    generate.py / apply_settings.py consume it unchanged; palette + clock are
    strictly additive. */
@@ -187,6 +187,33 @@ window.SBC = window.SBC || {};
     });
   }
 
+  /* weight (emphasis) cycling: bold -> normal -> dim, shown in place */
+  const EMPH_ORDER = ["bold", "normal", "dim"];
+  function cycleEmph(id) {
+    const st = state.seg[id];
+    st.emph = EMPH_ORDER[(EMPH_ORDER.indexOf(st.emph) + 1) % EMPH_ORDER.length];
+    render();
+  }
+  function mkWeight(segId, cls, label) {
+    const b = el("button", cls);
+    b.type = "button";
+    b.dataset.weight = segId;
+    if (label !== undefined) b.textContent = label;
+    b.addEventListener("click", () => cycleEmph(segId));
+    return b;
+  }
+  function paintWeights() {
+    document.querySelectorAll("[data-weight]").forEach((b) => {
+      const id = b.dataset.weight;
+      const em = S.EMPH[state.seg[id].emph] || S.EMPH.bold;
+      b.style.fontWeight = em.w;
+      b.style.opacity = em.o;
+      const msg = S.SEGMAP[id].name + " weight: " + state.seg[id].emph + ". Click to change.";
+      b.title = msg;
+      b.setAttribute("aria-label", msg);
+    });
+  }
+
   /* ---------- card faces ---------- */
   function heroFor(card) {
     return card.segs.map((id) => S.SEGMAP[id]).find((s) => s.hero);
@@ -246,6 +273,7 @@ window.SBC = window.SBC || {};
         opt.appendChild(mkSwitch(st.reset, "sm", "Show time to reset", (v) => { st.reset = v; render(); }));
         wrap.appendChild(opt);
       }
+      wrap.appendChild(weightRow(seg.id));
       if (card.scrub || seg.id === "ctxpct") {
         const key = card.scrub || "ctx";
         const sc = el("div", "scrub");
@@ -286,8 +314,19 @@ window.SBC = window.SBC || {};
 
   function colorRow(segId) {
     const opt = el("div", "opt-row");
-    opt.appendChild(el("span", null, "Color"));
-    opt.appendChild(mkSwatch(segId));
+    opt.appendChild(el("span", null, "Color & weight"));
+    const ctl = el("span", "opt-ctl");
+    ctl.appendChild(mkWeight(segId, "weight-chip", "Aa"));
+    ctl.appendChild(mkSwatch(segId));
+    opt.appendChild(ctl);
+    return opt;
+  }
+
+  /* gauges have no color row (auto gradient), so weight gets its own row */
+  function weightRow(segId) {
+    const opt = el("div", "opt-row");
+    opt.appendChild(el("span", null, "Weight"));
+    opt.appendChild(mkWeight(segId, "weight-chip", "Aa"));
     return opt;
   }
 
@@ -300,10 +339,11 @@ window.SBC = window.SBC || {};
       row.classList.toggle("is-off", !v);
       render();
     }));
-    const name = el("span", "rname", seg.name);
+    const name = mkWeight(seg.id, "rname", seg.name);
     if (seg.contextual) {
-      name.appendChild(el("span", "rnote", " ●"));
-      name.title = "Appears only when the session has this data";
+      const note = el("span", "rnote", " ●");
+      note.title = "Appears only when the session has this data";
+      name.appendChild(note);
     }
     row.appendChild(name);
     if (seg.modes) {
@@ -471,79 +511,8 @@ window.SBC = window.SBC || {};
     render();
   }
 
-  /* ---------- detail panel ---------- */
+  /* ---------- focused-card tracking (the panel is gone; dock + cards carry its controls) ---------- */
   let focusedCard = 0;
-
-  function buildPanel() {
-    const card = S.CARDS[focusedCard];
-    $("panelIcon").innerHTML = S.ICONS[card.icon] || "";
-    $("panelIcon").style.setProperty("--ci", TINT[card.id] || "#0a84ff");
-    $("panelName").textContent = card.name;
-    $("panelBlurb").textContent = card.blurb;
-    const wrap = $("panelSegs");
-    wrap.textContent = "";
-    if (card.kind !== "fields") {
-      const note = el("p", "panel-note", card.kind === "theme"
-        ? "Palettes retint the whole line at once. Tokyo Night is the classic look; the others bake their exact colors into the generated script."
-        : "These settings shape the whole line: the separator drawn between fields, emoji icons, left padding, and how often the terminal re-runs the script.");
-      wrap.appendChild(note);
-      return;
-    }
-    card.segs.forEach((id) => wrap.appendChild(buildPanelRow(id)));
-  }
-
-  function buildPanelRow(id) {
-    const seg = S.SEGMAP[id], st = state.seg[id];
-    const row = el("div", "prow" + (st.on ? "" : " is-off"));
-    row.dataset.prow = id;
-    row.appendChild(mkSwitch(st.on, "sm", seg.name + " visible in the status line", (v) => {
-      st.on = v; touchOrder(id);
-      syncCard(S.CARDMAP[seg.card]);
-      render();
-    }));
-    row.appendChild(el("span", "pname", seg.name));
-
-    const lineSeg = mkSegmented([["1", "1"], ["2", "2"]], String(st.line), seg.name + " line", (v) => {
-      st.line = +v;
-      touchOrder(id);
-      render();
-    });
-    lineSeg.classList.add("line-seg");
-    row.appendChild(lineSeg);
-
-    const stp = el("span", "stepper");
-    const dec = el("button", null, "‹"); dec.type = "button"; dec.setAttribute("aria-label", "Move " + seg.name + " earlier");
-    const pos = el("span", "st-val");
-    const inc = el("button", null, "›"); inc.type = "button"; inc.setAttribute("aria-label", "Move " + seg.name + " later");
-    const ids = () => S.lineIds(state, st.line);
-    const setPos = () => {
-      const list = ids();
-      pos.textContent = st.on ? (list.indexOf(id) + 1) + " of " + list.length : "-";
-    };
-    setPos();
-    const move = (dir) => {
-      const list = ids();
-      const i = list.indexOf(id);
-      const j = i + dir;
-      if (i < 0 || j < 0 || j >= list.length) return;
-      state.seg[list[j]].order = i;
-      st.order = j;
-      render();
-    };
-    dec.addEventListener("click", () => move(-1));
-    inc.addEventListener("click", () => move(1));
-    stp.appendChild(dec); stp.appendChild(pos); stp.appendChild(inc);
-    row.appendChild(stp);
-
-    row.appendChild(mkSelect([["bold", "bold"], ["normal", "normal"], ["dim", "dim"]], st.emph, seg.name + " weight", (v) => {
-      st.emph = v; render();
-    }));
-
-    const pill = el("span", "seg-pill");
-    pill.dataset.pill = id;
-    row.appendChild(pill);
-    return row;
-  }
 
   /* ---------- popovers ---------- */
   const pop = $("popover"), scrim = $("scrim");
@@ -601,7 +570,6 @@ window.SBC = window.SBC || {};
       closePopover();
       resetState();
       syncAllCards();
-      buildPanel();
       render();
     });
     row.appendChild(cancel); row.appendChild(ok);
@@ -614,11 +582,11 @@ window.SBC = window.SBC || {};
     wrap.appendChild(el("div", "pop-title", "Getting around"));
     const list = el("div", "help-list");
     [
-      ["Rotate the cards", "drag, side arrows, or <kbd>←</kbd> <kbd>→</kbd>"],
+      ["Rotate the cards", "drag, swipe, side arrows, or <kbd>←</kbd> <kbd>→</kbd>"],
       ["Focus a card", "click it, or a dot"],
       ["Jump to a field's card", "click it in the preview"],
-      ["Reorder fields", "drag the chips below the preview"],
-      ["Line 2", "set per field in the bottom panel"],
+      ["Reorder fields / move lines", "drag the chips below the preview"],
+      ["Font weight", "click a field name or its Aa chip"],
     ].forEach(([k, v]) => {
       const d = el("div");
       d.appendChild(el("span", null, k));
@@ -646,12 +614,16 @@ window.SBC = window.SBC || {};
       b.addEventListener("click", () => pickPreset(p));
       menu.appendChild(b);
     });
+    menu.appendChild(el("div", "menu-sep"));
+    const reset = el("button", "menu-item", "Reset everything");
+    reset.type = "button"; reset.setAttribute("role", "menuitem");
+    reset.addEventListener("click", () => { closeMenu(); openResetConfirm(presetsBtn); });
+    menu.appendChild(reset);
   }
   function pickPreset(p) {
     closeMenu();
     if (p) applyPreset(p); else hydrate(S.BOOT.applied);
     syncAllCards();
-    buildPanel();
     render();
   }
   function openMenu() {
@@ -670,13 +642,12 @@ window.SBC = window.SBC || {};
   /* ---------- top-level actions ---------- */
   function bindActions() {
     $("helpBtn").innerHTML = S.ICONS.help;
+    $("exportBtn").innerHTML = S.ICONS.export;
     $("prevBtn").innerHTML = S.ICONS.chevL;
     $("nextBtn").innerHTML = S.ICONS.chevR;
-    document.querySelectorAll(".btn-ic").forEach((b) => { b.innerHTML = S.ICONS[b.dataset.icon] || ""; });
     setThemeIcon();
 
     $("helpBtn").addEventListener("click", (e) => openHelp(e.currentTarget));
-    $("resetBtn").addEventListener("click", (e) => openResetConfirm(e.currentTarget));
     $("themeBtn").addEventListener("click", () => {
       const cur = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
       document.documentElement.dataset.theme = cur;
@@ -755,8 +726,8 @@ window.SBC = window.SBC || {};
     highlightFocused();
     buildDock();
     paintSwatches();
+    paintWeights();
     updateHeroPreviews();
-    updatePanelDynamic();
     updateRefreshNote();
   }
 
@@ -780,24 +751,6 @@ window.SBC = window.SBC || {};
         }
         foot.appendChild(S.segSpan(id, state));
       });
-    });
-  }
-
-  function updatePanelDynamic() {
-    document.querySelectorAll("[data-prow]").forEach((row) => {
-      const id = row.dataset.prow, st = state.seg[id];
-      row.classList.toggle("is-off", !st.on);
-      const pill = row.querySelector("[data-pill]");
-      if (pill) {
-        pill.textContent = "";
-        if (st.on) pill.appendChild(S.segSpan(id, state));
-        else { const off = el("span"); off.textContent = "off"; off.style.color = "#565f89"; pill.appendChild(off); }
-      }
-      const pos = row.querySelector(".st-val");
-      if (pos) {
-        const list = S.lineIds(state, st.line);
-        pos.textContent = st.on ? (list.indexOf(id) + 1) + " of " + list.length : "-";
-      }
     });
   }
 
@@ -874,7 +827,6 @@ window.SBC = window.SBC || {};
       onFocus: (i) => {
         focusedCard = i;
         syncDots();
-        buildPanel();
         render();
       },
     });

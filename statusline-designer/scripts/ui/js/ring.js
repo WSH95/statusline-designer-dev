@@ -106,6 +106,7 @@ window.SBC = window.SBC || {};
     onFocus = opts.onFocus || function () {};
 
     bindDrag();
+    bindWheel();
     bindKeys();
     bindParallax();
     const onMq = () => { ring.layout(); ring.goTo(ring.focusIndex(), false); };
@@ -229,6 +230,26 @@ window.SBC = window.SBC || {};
     };
     bandEl.addEventListener("pointerup", end);
     bandEl.addEventListener("pointercancel", end);
+  }
+
+  /* ---- two-finger trackpad swipe (horizontal wheel) ----
+     Only horizontal intent is captured; vertical deltas keep scrolling the
+     page. Snap to the nearest card once the gesture (and its inertia tail)
+     goes quiet for a beat. */
+  let wheelTimer = null;
+  function bindWheel() {
+    bandEl.addEventListener("wheel", (e) => {
+      if (ring.isFlat()) return;
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      if (animRaf) { cancelAnimationFrame(animRaf); animRaf = null; }
+      const d = e.deltaMode === 1 ? e.deltaX * 18 : e.deltaX;   // lines -> px
+      ring.rot += d / 480;
+      apply();
+      applyDepth();
+      clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(() => animateTo(Math.round(ring.rot)), 140);
+    }, { passive: false });
   }
 
   /* clicking a side card in flat mode (native click; no drag there) */
