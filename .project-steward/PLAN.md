@@ -21,13 +21,27 @@ holds milestones + a pointer only (never a duplicate task list).
 - [x] Sandboxed end-to-end verification (`dev/verify.sh`, 26 checks green): hydration
       round-trip, apply→generate→run payloads, settings merge, legacy equivalence,
       static checks, drop-in copy test; headless Chrome screenshots for all key states
-- [ ] User review session on sandboxed server (http://localhost:8899); iterate on feedback
-      (in-browser interaction QA: drag feel, popovers, menus - not coverable headlessly)
-- [ ] Final commit; on explicit go-ahead, install copy to `~/.claude/skills/`
+- [x] User review: three feedback iterations (2026-07-05/06)
+      - iteration 2: full-bleed rework - no app chrome, larger scale, crisp
+        slot-based coverflow (2D focused card/terminal, no blur), edge arrows
+      - iteration 3: detail panel removed (weight cycles on cards, Export in
+        toolbar, Reset in Presets menu), trackpad horizontal swipe, reliable
+        side-card clicks
+      - iteration 4: preview strips fixed-height flex (block glyphs no longer
+        misalign the Context Window card foot)
+- [x] Installed to `~/.claude/skills/statusline-designer` (rsync, byte-identical)
+      and the user's real status line regenerated via a browser Apply ->
+      generate.py -> apply_settings.py (2026-07-06)
+
+**Milestone delivered 2026-07-06.** verify.sh 26/26 at last run.
 
 ## Later
 
-- [ ] Optional: skill-creator description-optimization loop (user chose default skip)
+- [ ] Optional: run skill-creator's description-optimization loop - it auto-generates
+      ~20 realistic should/should-not-trigger prompts, measures how reliably the
+      SKILL.md `description` makes Claude invoke the skill, and iteratively rewrites
+      it. Current description (inherited from tuned v3) already triggers well; run
+      only if mis-triggering is ever observed.
 
 (Codex support removed from this plan 2026-07-06: it will be a separate skill on
 its own branch, since Codex's status-line interface may not match Claude Code's.)

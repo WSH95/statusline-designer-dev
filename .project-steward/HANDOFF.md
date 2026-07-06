@@ -3,7 +3,7 @@ updated_at: 2026-07-06T04:27:46Z
 updated_by: cli
 session_status: closed
 branch: main
-last_commit: 146a665
+last_commit: 69db6ed fix(ui): preview strip centering + PLAN.md current
 ---
 # Handoff
 

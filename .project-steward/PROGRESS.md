@@ -2,6 +2,13 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T05:00Z — iteration 4 (parting fixes)
+Context Window card foot misalignment fixed: preview strips are now 38px
+flex-centered (block bar glyphs inflated the line box in fallback mono
+fonts and pushed content low). Re-synced to installed skill; verify 26/26.
+PLAN.md brought current: milestone marked delivered with iteration 2/3/4
+entries; "Later" description-optimization line made self-explanatory.
+
 ### 2026-07-06T04:27:46Z — cli
 Status Bar Composer delivered: 3 design iterations, installed to ~/.claude/skills, user's live status line regenerated through the new pipeline; verify 26/26
 

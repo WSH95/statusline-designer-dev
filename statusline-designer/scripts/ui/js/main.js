@@ -743,14 +743,17 @@ window.SBC = window.SBC || {};
       const card = S.CARDMAP[foot.dataset.cardFoot];
       const ids = card.segs.filter((id) => state.seg[id].on);
       foot.textContent = "";
+      if (!ids.length) return;
+      const inner = el("span", "foot-in");    // one unit: centers as a whole, keeps ellipsis
       ids.forEach((id, i) => {
         if (i) {
           const sp = el("span", "psep");
           sp.textContent = " · ";
-          foot.appendChild(sp);
+          inner.appendChild(sp);
         }
-        foot.appendChild(S.segSpan(id, state));
+        inner.appendChild(S.segSpan(id, state));
       });
+      foot.appendChild(inner);
     });
   }
 
