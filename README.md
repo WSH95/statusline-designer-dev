@@ -84,6 +84,7 @@ statusline-designer/       # the drop-in skill (SKILL.md + scripts/)
   scripts/generate.py      # choice.json  ->  status-line script
   scripts/apply_settings.py# merges statusLine into settings.json
 dev/verify.sh              # sandboxed end-to-end checks
+dev/capture_readme_media.py# regenerates the README hero + demo GIF
 docs/                      # README media
 ```
 
@@ -91,6 +92,13 @@ Run the sandboxed end-to-end suite (never touches your real `~/.claude`):
 
 ```bash
 bash dev/verify.sh
+```
+
+Regenerate the README media after a UI change (sandboxed; needs `google-chrome`
+and `ffmpeg`):
+
+```bash
+python3 dev/capture_readme_media.py        # both; or --hero-only / --gif-only
 ```
 
 ## Requirements

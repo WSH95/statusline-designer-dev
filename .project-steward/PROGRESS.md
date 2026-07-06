@@ -2,6 +2,18 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T06:06Z — dev/capture_readme_media.py (reproducible README media)
+Promoted the throwaway capture driver into `dev/capture_readme_media.py`: one
+path-clean, sandboxed command that regenerates both `docs/` assets after a UI
+change — hero via headless `google-chrome --screenshot` at the "as pictured"
+deep link; GIF via a stdlib CDP/websocket driver that scripts the core tour,
+encoded with an ffmpeg two-pass palette. Mirrors `dev/verify.sh` (temp
+`STATUSLINE_DATA_DIR`, alt port 8799; `~/.claude` untouched) and tears down
+whole process groups (no `pkill`; chrome children reaped) so ports free and it
+re-runs cleanly. README Development section points to it; `--hero-only` /
+`--gif-only` flags. Verified: two clean runs (exit 0), ports free after, both
+`docs/` assets regenerated.
+
 ### 2026-07-06T05:56Z — [auto-checkpoint] README committed, push pending
 README + hero/GIF committed as `a7e6226`; `main` is 1 ahead of `origin`, awaiting user go-ahead to push.
 
