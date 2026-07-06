@@ -16,7 +16,7 @@ trap cleanup EXIT
 
 echo "== 0. python syntax =="
 for f in server.py generate.py apply_settings.py; do
-  python3 -m py_compile "$SKILL/scripts/$f" 2>/dev/null && ok "$f compiles" || bad "$f does not compile"
+  PYTHONDONTWRITEBYTECODE=1 python3 -m py_compile "$SKILL/scripts/$f" 2>/dev/null && ok "$f compiles" || bad "$f does not compile"
 done
 
 now=$(date +%s)
