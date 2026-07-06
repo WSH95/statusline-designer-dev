@@ -1,9 +1,9 @@
 ---
-updated_at: 2026-07-06T04:27:46Z
-updated_by: cli
-session_status: closed
+updated_at: 2026-07-06T05:56:00Z
+updated_by: claude
+session_status: active
 branch: main
-last_commit: 69db6ed fix(ui): preview strip centering + PLAN.md current
+last_commit: a7e6226 docs: add README with live hero screenshot and core-tour demo GIF
 ---
 # Handoff
 
@@ -12,7 +12,17 @@ another device). Keep every section current at wrap-up.
 
 ## Now
 
-**Project delivered.** The Status Bar Composer (complete UI redesign of the
+**This session (README).** Repo was made **public** (`WSH95/statusline-designer-dev`)
+and given a `README.md` + `docs/` media: a fresh **live** hero screenshot of the
+shipped UI and a ~10s **core-tour GIF** (ring rotation → focus a card → toggle
+Session cost + Lines changed so line 2 appears live → light/dark flip). Captured
+fully headless + sandbox (temp `STATUSLINE_DATA_DIR`, alt port; `~/.claude`
+untouched) via headless Chrome + a throwaway stdlib CDP driver. Committed as
+`a7e6226`; `main` is **1 ahead of origin, NOT yet pushed** — awaiting user go-ahead.
+
+---
+
+**Project delivered** (prior sessions). The Status Bar Composer (complete UI redesign of the
 statusline-designer Claude Code skill) went through three design iterations
 with the user and is:
 - committed on `main` (11 commits, working tree clean apart from this wrap),
@@ -33,17 +43,20 @@ surface, no detail panel.
 
 ## In flight
 
-- Nothing. Designer server and Apply-waiters were shut down at wrap
-  (the generated status line does not depend on them). The skill relaunches
-  its own server whenever it is next invoked ("redesign my statusline").
+- **Push pending user confirmation**: commit `a7e6226` (README + `docs/` media +
+  PROGRESS entry) is on `main` but not pushed to `origin`. Sandbox server and
+  headless Chrome were torn down; nothing else running.
 
 ## Next steps
 
-1. Codex-CLI variant: **separate skill on its own branch** (user decision;
+1. **Push `main` to `origin`** once the user confirms (publishes the README so it
+   renders on the public repo page). If README tweaks are wanted first, edit and
+   amend/re-commit before pushing.
+2. Codex-CLI variant: **separate skill on its own branch** (user decision;
    deliberately absent from this plan and the shipped skill).
-2. Optional, user chose default-skip: skill-creator description-optimization
+3. Optional, user chose default-skip: skill-creator description-optimization
    loop for the SKILL.md frontmatter.
-3. If UI bugs surface in daily use: edit repo, `bash dev/verify.sh`,
+4. If UI bugs surface in daily use: edit repo, `bash dev/verify.sh`,
    re-`rsync -a --delete statusline-designer/ ~/.claude/skills/statusline-designer/`,
    commit.
 

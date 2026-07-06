@@ -2,6 +2,9 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-06T05:56Z — [auto-checkpoint] README committed, push pending
+README + hero/GIF committed as `a7e6226`; `main` is 1 ahead of `origin`, awaiting user go-ahead to push.
+
 ### 2026-07-06T05:54Z — public GitHub repo + README (hero image + demo GIF)
 Published the repo public as `WSH95/statusline-designer-dev` and added
 `README.md`. It leads with a fresh live screenshot of the *shipped* UI (the
