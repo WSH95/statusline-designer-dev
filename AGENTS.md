@@ -2,6 +2,12 @@
 
 Development home of the statusline-designer Claude Code skill: a macOS-style 'Status Bar Composer' web UI (3D card ring + live terminal preview) that generates the user's status-line script
 
+**Claude Code only.** This is a skill *development* repo. Canonical source lives
+in `skill-src/<skill>/`; releases are built into `dist/` by
+`tools/build_skill_payloads.py` and shipped as pull requests to the
+[agent-skills](https://github.com/WSH95/agent-skills) repo via
+`tools/publish_agent_artifact_pr.py`. No other agent runtimes are targeted.
+
 Primary language/stack: Python 3 (stdlib server + generators) and vanilla HTML/CSS/JS.
 
 ## Source of truth
@@ -31,10 +37,11 @@ Primary language/stack: Python 3 (stdlib server + generators) and vanilla HTML/C
 
 | Task | Command |
 | --- | --- |
-| Build | `(none - no build step; vanilla JS served by python3)` |
-| Test | `bash dev/verify.sh` |
+| Build | `python3 tools/build_skill_payloads.py` (skill-src -> dist/) |
+| Test | `bash tools/verify.sh` |
 | Lint | `(none)` |
-| README media | `python3 dev/capture_readme_media.py` |
+| Publish | `python3 tools/publish_agent_artifact_pr.py --dry-run` (open PR: drop `--dry-run`) |
+| README media | `python3 tools/capture_readme_media.py` |
 <!-- PROJECT-STEWARD:END commands -->
 
 <!-- PROJECT-STEWARD:BEGIN task-backend -->

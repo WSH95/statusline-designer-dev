@@ -40,12 +40,18 @@ then flip between light and dark:
 
 ## Install & use
 
-**As a Claude Code skill (recommended).** Copy the skill into your Claude Code skills
-folder, then just ask for it:
+**From this dev repo** — copy the skill into your Claude Code skills folder:
 
 ```bash
 git clone https://github.com/WSH95/statusline-designer-dev.git
-cp -r statusline-designer-dev/statusline-designer ~/.claude/skills/statusline-designer
+cp -r statusline-designer-dev/skill-src/statusline-designer ~/.claude/skills/statusline-designer
+```
+
+Once it's published to the [agent-skills](https://github.com/WSH95/agent-skills) registry,
+you'll also be able to install it with:
+
+```bash
+npx skills add WSH95/agent-skills@statusline-designer
 ```
 
 Then in Claude Code, say something like *"design my status line"* or *"show git branch
@@ -56,7 +62,7 @@ to tweak — it re-hydrates from your current layout.
 **Run the designer directly.**
 
 ```bash
-python3 statusline-designer/scripts/server.py
+python3 skill-src/statusline-designer/scripts/server.py
 # open http://localhost:8765
 ```
 
@@ -74,31 +80,47 @@ data is absent.
 
 ## Development
 
-This repo is the development home of the skill. The shippable, self-contained skill lives
-in [`statusline-designer/`](statusline-designer/); everything else is dev tooling.
+**Claude Code only.** This repo is the development home of the skill: canonical source
+lives in [`skill-src/statusline-designer/`](skill-src/statusline-designer/), release
+payloads are **built into `dist/`**, and shipped as pull requests to the
+[agent-skills](https://github.com/WSH95/agent-skills) registry.
 
 ```
-statusline-designer/       # the drop-in skill (SKILL.md + scripts/)
-  scripts/server.py        # serves the composer UI
-  scripts/ui/              # vanilla HTML/CSS/JS (ring, preview, dock)
-  scripts/generate.py      # choice.json  ->  status-line script
-  scripts/apply_settings.py# merges statusLine into settings.json
-dev/verify.sh              # sandboxed end-to-end checks
-dev/capture_readme_media.py# regenerates the README hero + demo GIF
-docs/                      # README media
+skill-src/statusline-designer/     # canonical skill source (the drop-in: SKILL.md + scripts/)
+  scripts/server.py                # serves the composer UI
+  scripts/ui/                      # vanilla HTML/CSS/JS (ring, preview, dock)
+  scripts/generate.py              # choice.json  ->  status-line script
+  scripts/apply_settings.py        # merges statusLine into settings.json
+tools/build_skill_payloads.py      # skill-src/  ->  dist/  (clean, validated payload)
+tools/publish_agent_artifact_pr.py # opens a PR into agent-skills (never merges)
+tools/verify.sh                    # sandboxed end-to-end checks
+tools/capture_readme_media.py      # regenerates the README hero + demo GIF
+dist/                              # built payloads (generated; gitignored)
+docs/                              # README media
+agent-artifacts.json               # release manifest (build + publish config)
 ```
 
-Run the sandboxed end-to-end suite (never touches your real `~/.claude`):
+Build the release payload, then run the sandboxed end-to-end suite (never touches your
+real `~/.claude`):
 
 ```bash
-bash dev/verify.sh
+python3 tools/build_skill_payloads.py      # skill-src/ -> dist/
+bash tools/verify.sh                        # sandboxed end-to-end suite
+```
+
+Preview a release PR with no network calls, then open it for real when ready
+(needs an authenticated `gh`):
+
+```bash
+python3 tools/publish_agent_artifact_pr.py --dry-run
+python3 tools/publish_agent_artifact_pr.py   # opens the PR; never merges
 ```
 
 Regenerate the README media after a UI change (sandboxed; needs `google-chrome`
 and `ffmpeg`):
 
 ```bash
-python3 dev/capture_readme_media.py        # both; or --hero-only / --gif-only
+python3 tools/capture_readme_media.py       # both; or --hero-only / --gif-only
 ```
 
 ## Requirements

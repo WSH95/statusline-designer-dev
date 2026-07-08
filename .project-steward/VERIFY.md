@@ -5,16 +5,16 @@ How to check the project is healthy. Agents run these before claiming
 
 | Check | Command | Expected |
 | --- | --- | --- |
-| Build | `(none - no build step; vanilla JS served by python3)` | exits 0 |
-| Tests | `bash dev/verify.sh` | all pass |
+| Build | `python3 tools/build_skill_payloads.py` | builds `dist/`, exits 0 |
+| Tests | `bash tools/verify.sh` | all pass |
 | Lint | `(none)` | clean |
 
-Last verified: 2026-07-05 — 26 passed, 0 failed.
+Last verified: 2026-07-08 — 35 passed, 0 failed.
 
-## What dev/verify.sh covers
+## What tools/verify.sh covers
 
 Fully sandboxed (mktemp dir + `STATUSLINE_DATA_DIR`/`STATUSLINE_PORT` overrides,
-ports 8901/8902); never touches `~/.claude/settings.json`, the installed skill,
+ports 8901-8903); never touches `~/.claude/settings.json`, the installed skill,
 or the real `~/.claude/statusline-designer/`:
 
 - python syntax of server.py / generate.py / apply_settings.py
@@ -28,6 +28,8 @@ or the real `~/.claude/statusline-designer/`:
 - UI static checks: zero external URLs, reduced-motion + reduced-transparency
   blocks, no em/en dashes, `inert` on aside cards
 - drop-in test: the folder runs from a copied location
+- build check: `tools/build_skill_payloads.py` produces a cache-clean `dist/`
+  payload with all required files, and the built copy serves from `dist/`
 
 ## Headless visual QA
 
@@ -38,7 +40,7 @@ Screenshot any UI state via deep links
 google-chrome --headless=new --disable-gpu --hide-scrollbars \
   --force-prefers-reduced-motion \
   --window-size=1440,900 --virtual-time-budget=2500 \
-  --screenshot=dev/screenshots/x.png 'http://localhost:8899/#card=lim5h&theme=dark'
+  --screenshot=screenshots/x.png 'http://localhost:8899/#card=lim5h&theme=dark'
 ```
 
 `--force-prefers-reduced-motion` matters: headless virtual time does not advance

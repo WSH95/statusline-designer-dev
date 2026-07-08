@@ -10,8 +10,8 @@ Development home of the statusline-designer Claude Code skill: a macOS-style 'St
 - Completely redesign the web UI of the installed skill at `~/.claude/skills/statusline-designer`
   as the "Status Bar Composer": macOS frosted-glass aesthetic, live terminal preview,
   15 property cards in a 3D ring (click-to-center focus, drag / arrow-key / dot rotation),
-  bottom detail panel, arrangement dock. Reference design: `statusline-designer-ui.png`.
-- `statusline-designer/` in this repo is a **drop-in replacement**: copying it over
+  bottom detail panel, arrangement dock. Reference design: `docs/statusline-designer-ui.png`.
+- `skill-src/statusline-designer/` in this repo is a **drop-in replacement**: copying it over
   `~/.claude/skills/statusline-designer` must work, including re-hydrating the user's
   existing `~/.claude/statusline-designer/choice-applied.json` (13 segments, 2 lines).
 - Mock-parity extras: Clock segment, color theme presets (Tokyo Night default, Dracula,
@@ -20,9 +20,8 @@ Development home of the statusline-designer Claude Code skill: a macOS-style 'St
 
 ## Non-goals
 
-- Codex CLI support: out of scope for this skill entirely. Codex's status-line
-  interface likely differs from Claude Code's; it will be designed as a separate
-  skill on its own branch later (user decision, 2026-07-06).
+- Other agent runtimes: out of scope. This repo builds Claude Code skills only;
+  their status-line interfaces differ and are not targeted here.
 - Design JSON import, per-segment custom hex picker (explicitly deferred by user).
 - New bar rendering styles in the generated script (Display stays Off / Percent / Bar).
 
@@ -44,8 +43,19 @@ Development home of the statusline-designer Claude Code skill: a macOS-style 'St
   GET hydration from `choice-applied.json`, POST `/apply` → `choice.json` + copy,
   startup line `Status line designer: http://localhost:PORT ...`, and the
   `pgrep -f "[s]tatusline-designer/.*server\.py"` kill pattern.
-- No dev/maintenance files inside `statusline-designer/` (steward, workspace, scratch
-  all live at repo root).
+- No dev/maintenance files inside `skill-src/statusline-designer/` (steward,
+  tooling, scratch all live outside the skill source).
 - During development never modify `~/.claude/skills/statusline-designer`,
   `~/.claude/settings.json`, or `~/.claude/statusline-designer/` — all server/pipeline
   tests run against `STATUSLINE_DATA_DIR` sandboxes on alternate ports.
+
+## Repository layout & distribution
+
+Claude Code only. Canonical skill source lives in `skill-src/<skill>/`; nothing
+dev-related lives inside it. Tooling is in `tools/` (build, publish, verify,
+capture). `python3 tools/build_skill_payloads.py` copies each skill into a clean,
+validated payload under `dist/<skill>/` (generated; gitignored). Releases ship as
+pull requests to the agent-skills registry
+(`https://github.com/WSH95/agent-skills`, skill folder at that repo's root) via
+`python3 tools/publish_agent_artifact_pr.py`, configured by `agent-artifacts.json`.
+The publish script never merges; `--dry-run` previews with no network calls.

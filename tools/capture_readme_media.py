@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Regenerate the README media: docs/status-bar-composer.png + ...-demo.gif.
 
-Fully sandboxed and path-clean, mirroring dev/verify.sh: serves the composer on
+Fully sandboxed and path-clean, mirroring tools/verify.sh: serves the composer on
 an alt port with a temp STATUSLINE_DATA_DIR, drives headless google-chrome, and
 never touches ~/.claude. Run after any UI change to refresh the README assets.
 
-    python3 dev/capture_readme_media.py             # hero + gif
-    python3 dev/capture_readme_media.py --hero-only
-    python3 dev/capture_readme_media.py --gif-only
+    python3 tools/capture_readme_media.py             # hero + gif
+    python3 tools/capture_readme_media.py --hero-only
+    python3 tools/capture_readme_media.py --gif-only
 
 Requires: google-chrome (headless) and ffmpeg on PATH.
 
@@ -30,7 +30,7 @@ Gotchas baked in (learned the hard way — keep them):
 import argparse, base64, json, os, secrets, shutil, signal, socket, struct, subprocess, sys, tempfile, time, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SERVER = os.path.join(ROOT, "statusline-designer", "scripts", "server.py")
+SERVER = os.path.join(ROOT, "skill-src", "statusline-designer", "scripts", "server.py")
 DOCS = os.path.join(ROOT, "docs")
 HERO_PNG = os.path.join(DOCS, "status-bar-composer.png")
 DEMO_GIF = os.path.join(DOCS, "status-bar-composer-demo.gif")

@@ -4,7 +4,7 @@
 # ~/.claude/statusline-designer data dir. Safe to run repeatedly.
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SKILL="$ROOT/statusline-designer"
+SKILL="$ROOT/skill-src/statusline-designer"
 OLD_SKILL="${OLD_SKILL:-$HOME/.claude/skills/statusline-designer}"
 PORT="${VERIFY_PORT:-8901}"
 TMP="$(mktemp -d /tmp/sbc-verify-XXXXXX)"
@@ -120,6 +120,26 @@ SRV_PID=$!
 sleep 0.8
 code=$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' "http://127.0.0.1:$((PORT+1))/js/main.js")
 [ "$code" = 200 ] && ok "runs from a copied location (path independence)" || bad "copied skill broken: $code"
+kill "$SRV_PID" 2>/dev/null; SRV_PID=""
+
+echo "== 8. build payload (skill-src -> dist) =="
+BUILD_OUT="$TMP/dist"
+if python3 "$ROOT/tools/build_skill_payloads.py" --skill statusline-designer --out "$BUILD_OUT" >"$TMP/build.log" 2>&1; then
+  ok "build_skill_payloads.py succeeds"
+else
+  bad "build failed"; cat "$TMP/build.log"
+fi
+BP="$BUILD_OUT/statusline-designer"
+for f in SKILL.md scripts/server.py scripts/generate.py scripts/apply_settings.py scripts/ui/index.html scripts/ui/js/main.js; do
+  [ -f "$BP/$f" ] && ok "payload has $f" || bad "payload missing $f"
+done
+if find "$BP" \( -name '__pycache__' -o -name '*.pyc' \) 2>/dev/null | grep -q .; then bad "payload carries python cache"; else ok "payload is cache-clean"; fi
+mkdir -p "$TMP/data3"
+STATUSLINE_DATA_DIR="$TMP/data3" STATUSLINE_PORT=$((PORT+2)) python3 "$BP/scripts/server.py" >"$TMP/server3.log" 2>&1 &
+SRV_PID=$!
+sleep 0.8
+code=$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' "http://127.0.0.1:$((PORT+2))/js/main.js")
+[ "$code" = 200 ] && ok "built payload serves from dist" || bad "built payload broken: $code"
 kill "$SRV_PID" 2>/dev/null; SRV_PID=""
 
 echo

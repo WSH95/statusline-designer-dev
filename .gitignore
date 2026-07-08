@@ -4,8 +4,10 @@
 .project-steward/migration-backup-projectforge/
 # PROJECT-STEWARD:END runtime-state
 
-# dev scratch (sandboxed server data, generated test scripts, screenshots)
-dev/sandbox/
-dev/screenshots/
+# generated skill payloads (built from skill-src/ by tools/build_skill_payloads.py)
+dist/
+
+# local scratch (sandboxed captures, ad-hoc QA screenshots)
+screenshots/
 __pycache__/
 *.pyc

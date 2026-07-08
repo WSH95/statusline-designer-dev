@@ -2,6 +2,23 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-08T18:45Z — restructure into a Claude-Code-only skills dev repo
+Reorganized per the agent-artifact-maintainer layout: skill source -> `skill-src/
+statusline-designer/`, dev tooling -> `tools/`, concept mock -> `docs/` (all via
+git mv, byte-identical). Added `tools/build_skill_payloads.py` (skill-src -> a
+clean, validated `dist/<skill>/`), `tools/publish_agent_artifact_pr.py` +
+`agent-artifacts.json` (opens a PR placing the payload at the agent-skills repo
+root; never merges; `--dry-run` is network-free), and a build section to
+`tools/verify.sh`. Removed every legacy other-runtime reference and marked the
+repo Claude Code only (AGENTS.md intro + Commands, CLAUDE.md, README, PROJECT.md,
+DECISIONS 0003). Verified: `tools/verify.sh` 35/35 green (incl. legacy ANSI
+equivalence — the installed skill is unaffected); the composer renders live from
+skill-src (headless Chrome; the claude-in-chrome extension was offline);
+`publish --dry-run` lists 10 files with no network; a case-insensitive scan for
+the old runtime name is clean.
+Publish deferred (scaffold + dry-run only; needs `gh` auth + go-ahead).
+`~/.claude` untouched.
+
 ### 2026-07-06T06:41Z — AGENTS.md Commands: add README-media regen
 Listed `python3 dev/capture_readme_media.py` in the AGENTS.md Commands managed
 block (guardrail: diff shown + approved; recorded as DECISIONS 0002). README/docs
@@ -60,8 +77,8 @@ User's real Apply completed the loop: generate.py + apply_settings.py ran
 against the live config and the terminal status line now renders the new
 design. All 12 session tasks closed; verify 26/26; designer server and
 waiters shut down (skill self-starts on next invocation). Remaining ideas
-live in PLAN.md "Later" (Codex = separate skill/branch; optional description
-optimization). Repo and installed skill are in sync at 146a665 + wrap commit.
+live in PLAN.md "Later" (optional description optimization). Repo and installed
+skill are in sync at 146a665 + wrap commit.
 
 ### 2026-07-06T00:40Z — [auto-checkpoint] iteration 3 shipped + skill installed for real; server on :8765 with real data dir; waiter armed for the user's first real Apply
 

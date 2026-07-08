@@ -35,6 +35,19 @@ holds milestones + a pointer only (never a duplicate task list).
 
 **Milestone delivered 2026-07-06.** verify.sh 26/26 at last run.
 
+## Restructure into a Claude-Code-only skills dev repo (2026-07-08)
+
+- [x] Move skill source to `skill-src/statusline-designer/` and dev tooling to
+      `tools/` (git mv, byte-identical); moved the concept mock to `docs/`
+- [x] Add `tools/build_skill_payloads.py` (skill-src -> `dist/`, cache-clean +
+      validated) and a build check to `tools/verify.sh`
+- [x] Add `tools/publish_agent_artifact_pr.py` + `agent-artifacts.json`
+      (PR into agent-skills at the repo root; never merges; `--dry-run`)
+- [x] Remove all legacy other-runtime references; mark the repo Claude Code only
+      (AGENTS.md, CLAUDE.md, README.md, PROJECT.md)
+- [x] Update docs/ignores: README dev section, `.gitignore` (`dist/`), VERIFY.md
+- [x] Verify: `tools/verify.sh` 35/35 + live composer render + publish --dry-run
+
 ## Later
 
 - [ ] Optional: run skill-creator's description-optimization loop - it auto-generates
@@ -42,6 +55,3 @@ holds milestones + a pointer only (never a duplicate task list).
       SKILL.md `description` makes Claude invoke the skill, and iteratively rewrites
       it. Current description (inherited from tuned v3) already triggers well; run
       only if mis-triggering is ever observed.
-
-(Codex support removed from this plan 2026-07-06: it will be a separate skill on
-its own branch, since Codex's status-line interface may not match Claude Code's.)

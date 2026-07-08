@@ -18,3 +18,23 @@ instructions, not a log, and the media/how-to already live in `README.md` and
 `HANDOFF.md`.
 **Consequences**: Agents discover one documented command to refresh the README
 media after any UI change; AGENTS.md stays lean and non-duplicative.
+
+## 0003 — 2026-07-08 — Restructure as a Claude-Code-only skills dev repo
+
+**Context**: The repo should serve purely as a development home. Release-ready
+skills need a reproducible build and a review-friendly publish path, and the
+project is narrowing to Claude Code only — support for other agent runtimes is
+dropped and those references are removed.
+**Decision**: Adopt the agent-artifact-maintainer layout — canonical source in
+`skill-src/<skill>/`, tooling in `tools/`, generated payloads in `dist/`
+(gitignored). Add `tools/build_skill_payloads.py` (clean + validated build) and
+`tools/publish_agent_artifact_pr.py` + `agent-artifacts.json` to open PRs into
+the agent-skills registry (skill folder at that repo's root; the script never
+merges). Mark the repo Claude Code only in AGENTS.md, CLAUDE.md, README.md, and
+PROJECT.md; the skill's own files under `skill-src/` are unchanged.
+**Guardrail note**: `AGENTS.md` was edited outside its managed blocks (the intro
+scope note) under the user's explicit authorization for this task; the Commands
+managed block was updated to the new `tools/` paths plus build/publish commands.
+**Consequences**: One command builds a shippable payload; one command (or its
+`--dry-run`) proposes a registry PR. The installed skill and `~/.claude` stay
+untouched, and the repo no longer names other agent runtimes.
