@@ -34,8 +34,8 @@ a Claude-Code-only skill development repo with a build + publish pipeline.**
 ## In flight
 
 - Nothing local. Working tree clean; the sandbox review server (port 8765) was
-  torn down. `~/.claude` untouched. Dev-repo commits are **local, not pushed**
-  (per the repo's git policy).
+  torn down. `~/.claude` untouched. Dev-repo commits are **pushed** — `origin/main`
+  is in sync (the user approved the push at session end).
 
 ## Next steps
 

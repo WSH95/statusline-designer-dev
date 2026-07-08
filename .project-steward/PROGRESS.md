@@ -2,6 +2,11 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-08T19:20Z — pushed dev repo to origin/main (user approved at session end)
+Pushed the restructure + publish commits (through this steward wrap) to
+`origin/main`; the dev repo is in sync. PR #1 to agent-skills stays open for the
+user's review/merge.
+
 ### 2026-07-08T19:10Z — published statusline-designer to agent-skills (PR #1)
 Refined the publish step and opened the first registry PR. Changed `target_path`
 to `skills/statusline-designer` and added `readme_entry`
