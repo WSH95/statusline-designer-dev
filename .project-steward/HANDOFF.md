@@ -3,7 +3,7 @@ updated_at: 2026-07-08T18:50:00Z
 updated_by: claude
 session_status: closed
 branch: main
-last_commit: b193b9a refactor(repo): restructure into a Claude-Code-only skills dev repo
+last_commit: f6d94c3 refactor(repo): restructure into a Claude-Code-only skills dev repo
 ---
 # Handoff
 
