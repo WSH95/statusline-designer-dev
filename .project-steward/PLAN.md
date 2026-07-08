@@ -54,7 +54,7 @@ holds milestones + a pointer only (never a duplicate task list).
       `readme_entry` to `agent-artifacts.json`
 - [x] Add `docs/registry/statusline-designer.md` (template-conformant `## Skills`
       entry + demo GIF via raw URL) and a README upsert to the publish script
-- [ ] Open the first real PR to agent-skills (never merge) — record the URL
+- [x] Opened PR #1 (https://github.com/WSH95/agent-skills/pull/1) — never merged
 
 ## Later
 

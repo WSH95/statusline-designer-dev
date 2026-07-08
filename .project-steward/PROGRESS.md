@@ -2,6 +2,18 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-07-08T19:10Z — published statusline-designer to agent-skills (PR #1)
+Refined the publish step and opened the first registry PR. Changed `target_path`
+to `skills/statusline-designer` and added `readme_entry`
+(`docs/registry/statusline-designer.md`) — a template-conformant `## Skills` entry
+that embeds the demo GIF via this repo's raw URL and uses the real skill name (no
+per-skill install line; the registry's `## Installing` covers it). The publish
+script now upserts the registry README `## Skills` section idempotently. Verified:
+verify.sh 35/35, raw GIF URL 200 (image/gif), `--dry-run` clean. Opened
+https://github.com/WSH95/agent-skills/pull/1 (branch
+`publish/statusline-designer-20260708-164117`; 11 files; never merged). Dev-repo
+commits remain local (not pushed).
+
 ### 2026-07-08T18:45Z — restructure into a Claude-Code-only skills dev repo
 Reorganized per the agent-artifact-maintainer layout: skill source -> `skill-src/
 statusline-designer/`, dev tooling -> `tools/`, concept mock -> `docs/` (all via
