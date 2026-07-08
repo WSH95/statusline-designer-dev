@@ -1,5 +1,5 @@
 {
-  "$comment": "Release manifest for this Claude Code skills dev repo. `build` copies skill-src/<name>/ into dist/<name>/; `publish` opens a PR that places dist/<name>/ at <target_repo>/<target_path>/. See tools/build_skill_payloads.py and tools/publish_agent_artifact_pr.py.",
+  "$comment": "Release manifest for this Claude Code skills dev repo. `build` copies skill-src/<name>/ into dist/<name>/; `publish` opens a PR that places dist/<name>/ at <target_repo>/<target_path>/ and fills the target README's '## Skills' section from <readme_entry>. See tools/build_skill_payloads.py and tools/publish_agent_artifact_pr.py.",
   "artifacts": [
     {
       "name": "statusline-designer",
@@ -7,8 +7,9 @@
       "build_command": "python3 tools/build_skill_payloads.py",
       "source_path": "dist/statusline-designer",
       "target_repo": "https://github.com/WSH95/agent-skills",
-      "target_path": "statusline-designer",
-      "base_branch": "main"
+      "target_path": "skills/statusline-designer",
+      "base_branch": "main",
+      "readme_entry": "docs/registry/statusline-designer.md"
     }
   ]
 }

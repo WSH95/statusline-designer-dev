@@ -38,3 +38,17 @@ managed block was updated to the new `tools/` paths plus build/publish commands.
 **Consequences**: One command builds a shippable payload; one command (or its
 `--dry-run`) proposes a registry PR. The installed skill and `~/.claude` stay
 untouched, and the repo no longer names other agent runtimes.
+
+## 0004 — 2026-07-08 — Publish under skills/, with a template-conformant README entry
+
+**Context**: Refining the publish step before the first real release PR.
+**Decision**: Place each skill under the agent-skills repo's `skills/<name>/`
+(supersedes ADR 0003's repo-root placement; set via `target_path`). Add a per-skill
+`readme_entry` that the publish script merges into the registry README's `## Skills`
+section, following that repo's existing template verbatim and embedding the demo GIF
+via this repo's public raw URL (not copied into the registry). Use the real skill
+name `statusline-designer` (not the UI label "Status Bar Composer"). Open the first
+PR now that `gh` is authenticated; the script still never merges.
+**Consequences**: `npx skills add WSH95/agent-skills@statusline-designer` resolves a
+skill under `skills/`; the registry README gains a concise, on-template use-case
+entry with the animated demo; no binaries are duplicated into the registry.

@@ -2,7 +2,8 @@
 """Publish a built skill payload to the agent-skills repo as a pull request.
 
 Reads agent-artifacts.json, (re)builds the payload, copies it into a checkout of
-the target repo at the configured `target_path`, and opens a PR with `gh`.
+the target repo at the configured `target_path`, fills in the target README's
+`## Skills` section from `readme_entry`, and opens a PR with `gh`.
 It never merges. With --dry-run it builds and prints exactly what it would do
 and makes no network calls.
 
@@ -63,6 +64,36 @@ def copy_payload(src_dir, dst_dir):
     shutil.copytree(src_dir, dst_dir)
 
 
+def read_readme_entry(a):
+    """Return the markdown for this skill's target-README '## Skills' section, or None."""
+    rel = a.get("readme_entry")
+    if not rel:
+        return None
+    path = os.path.join(ROOT, rel)
+    if not os.path.isfile(path):
+        sys.exit("error: readme_entry not found: %s" % path)
+    with open(path, encoding="utf-8") as fh:
+        return fh.read().rstrip("\n") + "\n"
+
+
+def upsert_skills_section(readme_path, section_md):
+    """Replace the target README's '## Skills' section (from that heading up to the
+    next top-level '## ' heading) with section_md. Idempotent; leaves other sections
+    (e.g. '## Installing', '## License') untouched."""
+    with open(readme_path, encoding="utf-8") as fh:
+        lines = fh.readlines()
+    start = next((i for i, ln in enumerate(lines) if ln.strip() == "## Skills"), None)
+    if start is None:
+        sys.exit("error: target README has no '## Skills' section to fill in")
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")),
+               len(lines))
+    new = lines[:start] + [section_md.rstrip("\n") + "\n"]
+    if end < len(lines):
+        new += ["\n"] + lines[end:]
+    with open(readme_path, "w", encoding="utf-8") as fh:
+        fh.writelines(new)
+
+
 def publish(a, args):
     name = a["name"]
     build_command = a["build_command"]
@@ -81,6 +112,7 @@ def publish(a, args):
     if not os.path.isdir(source_path):
         sys.exit("error: build did not produce %s" % source_path)
     files = list_files(source_path)
+    section = read_readme_entry(a)
 
     if args.dry_run:
         log("DRY RUN — no network calls, no PR")
@@ -88,8 +120,11 @@ def publish(a, args):
             % (len(files), target_repo, base, target_path))
         for f in files:
             print("    %s/%s" % (target_path.rstrip("/"), f))
-        log("plan: clone -> branch off %s -> copy payload -> commit -> push "
-            "-> gh pr create  (never merges)" % base)
+        if section:
+            log("would replace the target README '## Skills' section with:")
+            print("\n" + section)
+        log("plan: clone -> branch off %s -> copy payload -> update README "
+            "-> commit -> push -> gh pr create  (never merges)" % base)
         return
 
     if not shutil.which("gh"):
@@ -113,6 +148,8 @@ def publish(a, args):
         branch = "publish/%s-%s" % (name, time.strftime("%Y%m%d-%H%M%S"))
         run(["git", "checkout", "-b", branch], cwd=checkout)
         copy_payload(source_path, os.path.join(checkout, target_path))
+        if section:
+            upsert_skills_section(os.path.join(checkout, "README.md"), section)
         run(["git", "add", "-A"], cwd=checkout)
         if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=checkout).returncode == 0:
             log("no changes vs. the published version — skipping PR")

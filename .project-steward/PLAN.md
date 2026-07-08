@@ -42,11 +42,19 @@ holds milestones + a pointer only (never a duplicate task list).
 - [x] Add `tools/build_skill_payloads.py` (skill-src -> `dist/`, cache-clean +
       validated) and a build check to `tools/verify.sh`
 - [x] Add `tools/publish_agent_artifact_pr.py` + `agent-artifacts.json`
-      (PR into agent-skills at the repo root; never merges; `--dry-run`)
+      (PR into agent-skills under `skills/`; also fills the registry README; never merges; `--dry-run`)
 - [x] Remove all legacy other-runtime references; mark the repo Claude Code only
       (AGENTS.md, CLAUDE.md, README.md, PROJECT.md)
 - [x] Update docs/ignores: README dev section, `.gitignore` (`dist/`), VERIFY.md
 - [x] Verify: `tools/verify.sh` 35/35 + live composer render + publish --dry-run
+
+## Publish statusline-designer to agent-skills (2026-07-08)
+
+- [x] Change target to `skills/statusline-designer` (was repo root) + add
+      `readme_entry` to `agent-artifacts.json`
+- [x] Add `docs/registry/statusline-designer.md` (template-conformant `## Skills`
+      entry + demo GIF via raw URL) and a README upsert to the publish script
+- [ ] Open the first real PR to agent-skills (never merge) — record the URL
 
 ## Later
 

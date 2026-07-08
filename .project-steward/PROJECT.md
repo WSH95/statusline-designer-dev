@@ -56,6 +56,7 @@ dev-related lives inside it. Tooling is in `tools/` (build, publish, verify,
 capture). `python3 tools/build_skill_payloads.py` copies each skill into a clean,
 validated payload under `dist/<skill>/` (generated; gitignored). Releases ship as
 pull requests to the agent-skills registry
-(`https://github.com/WSH95/agent-skills`, skill folder at that repo's root) via
-`python3 tools/publish_agent_artifact_pr.py`, configured by `agent-artifacts.json`.
+(`https://github.com/WSH95/agent-skills`, skill folder under that repo's `skills/`)
+via `python3 tools/publish_agent_artifact_pr.py`, configured by `agent-artifacts.json`
+(which also names a README use-case entry merged into the registry's `## Skills` section).
 The publish script never merges; `--dry-run` previews with no network calls.
