@@ -2,6 +2,20 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-08-16T10:15Z — fixed a destructive registry-README upsert; repaired PR #4
+The user caught that PR #4 deleted the `paper-polish-standalone` and
+`paper-review-standalone` entries from the agent-skills README. Cause:
+`upsert_skills_section()` replaced the whole `## Skills` section with this repo's
+`readme_entry` — safe when we owned the only entry, destructive once PR #3 merged other
+skills. Replaced it with `merge_skill_into_readme()`, which upserts only this skill's
+bullet and its `#### <name> Use Case` block (append if absent, idempotent, fail-loud when
+the entry file's name does not match). verify.sh §10 is the regression test: a 3-skill
+fixture asserting the other skills survive byte-identical, plus an append case and a
+parser-rejection case. Proved against the live registry README: the merge produces a
+4-line diff touching only our block. Repaired PR #4 in place (restored README.md from
+main, re-merged, pushed `dd0209e`) — README is now +4/-4 and the PR number/history is
+preserved. Not merged by the agent.
+
 ### 2026-08-16T09:50Z — committed, pushed, and published as agent-skills PR #4
 Committed the user-invocation + launcher work as 755c66e and pushed to origin/main
 (user approved). Added README feature bullets for the two apply buttons and the

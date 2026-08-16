@@ -52,6 +52,11 @@ PR now that `gh` is authenticated; the script still never merges.
 **Consequences**: `npx skills add WSH95/agent-skills@statusline-designer` resolves a
 skill under `skills/`; the registry README gains a concise, on-template use-case
 entry with the animated demo; no binaries are duplicated into the registry.
+**Amended 2026-08-16**: the README upsert as first written replaced the whole
+`## Skills` section, which was only safe while this repo owned the sole entry. Once
+other skills landed upstream it deleted them (caught in PR #4, see PROGRESS). The
+publish script now upserts **only** this skill's bullet and its
+`#### <name> Use Case` block; `tools/verify.sh` §10 is the regression test.
 
 ## 0005 — 2026-08-16 — User-invoked skill + a self-closing agentless launcher
 

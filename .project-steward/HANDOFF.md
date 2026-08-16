@@ -1,5 +1,5 @@
 ---
-updated_at: 2026-08-16T09:50:00Z
+updated_at: 2026-08-16T10:20:00Z
 updated_by: claude
 session_status: closed
 branch: main
@@ -32,8 +32,9 @@ build + publish pipeline.
   bare `server.py` hides the button. No idle timeout — Ctrl-C is the other exit. ADR 0005.
 
 - **Open PR (NOT merged):** https://github.com/WSH95/agent-skills/pull/4 — branch
-  `publish/statusline-designer-20260816-094710`, +294/-124 across 6 files (SKILL.md,
+  `publish/statusline-designer-20260816-094710`, +294/-102 across 6 files (SKILL.md,
   the new `open_designer.py`, `server.py`, `index.html`, `main.js`, registry README).
+  Its second commit `dd0209e` repairs the README: only this skill's block changes (+4/-4).
   Review and merge on GitHub. **An agent must not merge it.**
   PR #1 (the original publish) was MERGED upstream, so #4 is an incremental update on
   top of it — not a duplicate.
@@ -43,9 +44,9 @@ build + publish pipeline.
   README entry), `agent-artifacts.json` (manifest).
 - Distribution: `python3 tools/build_skill_payloads.py` -> clean `dist/<skill>/`;
   `python3 tools/publish_agent_artifact_pr.py` builds, copies to `skills/<name>/`
-  in agent-skills, upserts the registry README `## Skills` section from
-  `readme_entry`, pushes a fresh timestamped branch, and `gh pr create` (never
-  merges). `--dry-run` is network-free.
+  in agent-skills, upserts ONLY this skill's bullet + use-case block in the registry
+  README from `readme_entry`, pushes a fresh timestamped branch, and `gh pr create`
+  (never merges). `--dry-run` is network-free.
 - Scope: Claude Code only; no other-runtime references remain.
 
 ## In flight
@@ -82,16 +83,17 @@ build + publish pipeline.
 - `skill-src/statusline-designer/` — the shipped skill; `scripts/open_designer.py`
   is the entry point everything else now goes through.
 - `tools/build_skill_payloads.py` — skill-src -> `dist/<skill>/`; validates + fails loud.
-- `tools/publish_agent_artifact_pr.py` — dist -> PR into agent-skills; upserts the
-  registry README `## Skills` section from `readme_entry`; `--dry-run`, `--checkout`,
-  `--base`; never merges.
+- `tools/publish_agent_artifact_pr.py` — dist -> PR into agent-skills;
+  `merge_skill_into_readme()` upserts just this skill's bullet + `#### <name> Use Case`
+  block from `readme_entry`; `--dry-run`, `--checkout`, `--base`; never merges.
 - `agent-artifacts.json` — `target_path: skills/statusline-designer`,
   `readme_entry: docs/registry/statusline-designer.md`.
-- `docs/registry/statusline-designer.md` — the registry README `## Skills` section
-  (follows agent-skills' template verbatim; embeds the demo GIF by raw URL; uses the
-  real skill name).
-- `tools/verify.sh` — sandboxed suite, 55 checks (§9 = the two-phase agentless launcher
-  test). `README.md` + `docs/` — front page + media.
+- `docs/registry/statusline-designer.md` — this skill's registry README entry; keeps the
+  target's full shape (`## Skills` + bullet + `### Use Case` + `#### <name> Use Case`),
+  of which only the bullet and the `####` block are published. Follows agent-skills'
+  template verbatim; embeds the demo GIF by raw URL; uses the real skill name.
+- `tools/verify.sh` — sandboxed suite, 57 checks (§9 = the two-phase agentless launcher
+  test, §10 = the shared-registry-README merge). `README.md` + `docs/` — front page + media.
 
 ## Tried and rejected
 
@@ -108,6 +110,10 @@ build + publish pipeline.
 - **verify.sh §1 compares against the INSTALLED old skill** — it stays meaningful only
   while `generate.py` rendering is unchanged (this change did not touch it).
 - **Publish is outward-facing**: needs `gh` auth; opens a PR, never merges; `--dry-run` first.
+- **The registry README is SHARED with other people's skills.** Publishing must only ever
+  touch this skill's own bullet and its `#### statusline-designer Use Case` block
+  (`merge_skill_into_readme`, regression-tested in verify.sh §10). The original
+  whole-section upsert deleted the Paperforge entries in PR #4 before it was caught.
 - Making the skill user-invoked **costs discoverability**: nothing but the user typing
   `/statusline-designer` can reach it. Reversing = drop the frontmatter line and
   restore a trigger-carrying description.

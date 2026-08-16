@@ -2,10 +2,13 @@
 """Publish a built skill payload to the agent-skills repo as a pull request.
 
 Reads agent-artifacts.json, (re)builds the payload, copies it into a checkout of
-the target repo at the configured `target_path`, fills in the target README's
-`## Skills` section from `readme_entry`, and opens a PR with `gh`.
+the target repo at the configured `target_path`, upserts this skill's own entry
+into the target README from `readme_entry`, and opens a PR with `gh`.
 It never merges. With --dry-run it builds and prints exactly what it would do
 and makes no network calls.
+
+The registry README is SHARED with other people's skills: only this skill's bullet
+and its `#### <name> Use Case` block are ever written: see merge_skill_into_readme.
 
     python3 tools/publish_agent_artifact_pr.py --dry-run          # safe preview (no network)
     python3 tools/publish_agent_artifact_pr.py --skill NAME       # open a real PR (needs gh auth)
@@ -65,7 +68,7 @@ def copy_payload(src_dir, dst_dir):
 
 
 def read_readme_entry(a):
-    """Return the markdown for this skill's target-README '## Skills' section, or None."""
+    """Return the markdown of this skill's target-README entry, or None."""
     rel = a.get("readme_entry")
     if not rel:
         return None
@@ -76,22 +79,78 @@ def read_readme_entry(a):
         return fh.read().rstrip("\n") + "\n"
 
 
-def upsert_skills_section(readme_path, section_md):
-    """Replace the target README's '## Skills' section (from that heading up to the
-    next top-level '## ' heading) with section_md. Idempotent; leaves other sections
-    (e.g. '## Installing', '## License') untouched."""
+def _usecase_heading(name):
+    return "#### %s Use Case" % name
+
+
+def _block_end(lines, start, stops):
+    """Index just past the block beginning at `start`, i.e. the next line starting with
+    any of `stops` (or end of list). Trailing blank lines are left out of the block."""
+    end = next((i for i in range(start + 1, len(lines))
+                if any(lines[i].startswith(s) for s in stops)), len(lines))
+    while end > start + 1 and not lines[end - 1].strip():
+        end -= 1
+    return end
+
+
+def parse_readme_entry(entry_md, name):
+    """Split this skill's entry file into (bullet_line, usecase_block).
+
+    The entry keeps the target README's full shape ('## Skills' + bullet + '### Use Case'
+    + '#### <name> Use Case'); only those two pieces are ever written to the target, so a
+    shared registry README keeps every other skill's content.
+    """
+    lines = entry_md.splitlines(keepends=True)
+    bullet = next((ln for ln in lines if ln.startswith("- [%s]" % name)), None)
+    if bullet is None:
+        sys.exit("error: readme_entry has no '- [%s](...)' bullet" % name)
+    head = _usecase_heading(name)
+    start = next((i for i, ln in enumerate(lines) if ln.strip() == head), None)
+    if start is None:
+        sys.exit("error: readme_entry has no '%s' heading" % head)
+    end = _block_end(lines, start, ("#### ", "### ", "## "))
+    return bullet, lines[start:end]
+
+
+def merge_skill_into_readme(readme_path, name, entry_md):
+    """Upsert ONLY this skill's bullet and its '#### <name> Use Case' block into the
+    target README's '## Skills' section. Every other skill's bullet and block is left
+    byte-identical -- the registry README is shared. Idempotent."""
+    bullet, usecase = parse_readme_entry(entry_md, name)
     with open(readme_path, encoding="utf-8") as fh:
         lines = fh.readlines()
+
     start = next((i for i, ln in enumerate(lines) if ln.strip() == "## Skills"), None)
     if start is None:
         sys.exit("error: target README has no '## Skills' section to fill in")
     end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")),
                len(lines))
-    new = lines[:start] + [section_md.rstrip("\n") + "\n"]
-    if end < len(lines):
-        new += ["\n"] + lines[end:]
+    section = lines[start:end]
+
+    # 1. the bullet: replace ours in place, else append after the last bullet
+    ours = next((i for i, ln in enumerate(section) if ln.startswith("- [%s]" % name)), None)
+    if ours is not None:
+        section[ours] = bullet
+    else:
+        last = max((i for i, ln in enumerate(section) if ln.startswith("- [")), default=0)
+        section.insert(last + 1, bullet)
+
+    # 2. the use case: replace our block in place, else append to '### Use Case'
+    head = _usecase_heading(name)
+    ours = next((i for i, ln in enumerate(section) if ln.strip() == head), None)
+    if ours is not None:
+        section[ours:_block_end(section, ours, ("#### ", "## "))] = usecase
+    else:
+        if not any(ln.strip() == "### Use Case" for ln in section):
+            section += ["\n", "### Use Case\n"]
+        while section and not section[-1].strip():
+            section.pop()
+        section += ["\n"] + usecase
+
+    while section and not section[-1].strip():          # exactly one blank line before
+        section.pop()                                   # whatever section follows
     with open(readme_path, "w", encoding="utf-8") as fh:
-        fh.writelines(new)
+        fh.writelines(lines[:start] + section + (["\n"] + lines[end:] if end < len(lines) else []))
 
 
 def publish(a, args):
@@ -121,8 +180,10 @@ def publish(a, args):
         for f in files:
             print("    %s/%s" % (target_path.rstrip("/"), f))
         if section:
-            log("would replace the target README '## Skills' section with:")
-            print("\n" + section)
+            bullet, usecase = parse_readme_entry(section, name)
+            log("would upsert ONLY this skill's bullet and use-case block into the "
+                "target README (every other skill left untouched):")
+            print("\n" + bullet + "\n" + "".join(usecase))
         log("plan: clone -> branch off %s -> copy payload -> update README "
             "-> commit -> push -> gh pr create  (never merges)" % base)
         return
@@ -149,7 +210,7 @@ def publish(a, args):
         run(["git", "checkout", "-b", branch], cwd=checkout)
         copy_payload(source_path, os.path.join(checkout, target_path))
         if section:
-            upsert_skills_section(os.path.join(checkout, "README.md"), section)
+            merge_skill_into_readme(os.path.join(checkout, "README.md"), name, section)
         run(["git", "add", "-A"], cwd=checkout)
         if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=checkout).returncode == 0:
             log("no changes vs. the published version — skipping PR")

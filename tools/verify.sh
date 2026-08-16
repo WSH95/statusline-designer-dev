@@ -198,6 +198,119 @@ EOF
 cmp -s "$TMP/data5/choice-applied.json" "$TMP/v4.json" && ok "choice-applied.json mirrored" || bad "choice-applied.json wrong"
 grep -q "Designer closed." "$TMP/launcher.log" && ok "launcher reports the close" || bad "no close message: $(tail -2 "$TMP/launcher.log")"
 
+echo "== 10. registry README merge (shared file: never clobber other skills) =="
+cat > "$TMP/registry.md" <<'EOF'
+# agent-skills
+
+## Installing
+
+Install with `npx skills add ...`.
+
+## Skills
+
+- [statusline-designer](#statusline-designer-use-case) - OLD one-liner.
+- [other-skill-a](#other-skill-a-use-case) - keep me exactly as I am.
+- [other-skill-b](#other-skill-b-use-case) - and me.
+
+### Use Case
+
+#### statusline-designer Use Case
+
+OLD body that must be replaced.
+
+#### other-skill-a Use Case
+
+Body A, untouched.
+
+Example interactions:
+
+- ask A something
+
+#### other-skill-b Use Case
+
+Body B, untouched.
+
+## License
+
+MIT.
+EOF
+python3 - "$ROOT" "$TMP" <<'EOF' && ok "merge keeps other skills, upserts ours, idempotent" || bad "registry README merge broken"
+import importlib.util, io, os, re, sys, shutil
+root, tmp = sys.argv[1], sys.argv[2]
+spec = importlib.util.spec_from_file_location("pub", os.path.join(root, "tools/publish_agent_artifact_pr.py"))
+pub = importlib.util.module_from_spec(spec); spec.loader.exec_module(pub)
+entry = io.open(os.path.join(root, "docs/registry/statusline-designer.md"), encoding="utf-8").read()
+
+def others(text):
+    """Every line belonging to another skill: they must survive byte-identical."""
+    keep, cur = [], None
+    for ln in text.splitlines():
+        if ln.startswith("#### "):
+            cur = ln
+        elif ln.startswith("## ") or ln.startswith("### "):
+            cur = None                       # left the per-skill blocks
+        if ln.startswith("- [other-") or (cur and cur.startswith("#### other-")):
+            keep.append(ln)
+    return keep
+
+src = os.path.join(tmp, "registry.md")
+before = io.open(src, encoding="utf-8").read()
+work = os.path.join(tmp, "registry-merged.md"); shutil.copy(src, work)
+pub.merge_skill_into_readme(work, "statusline-designer", entry)
+after = io.open(work, encoding="utf-8").read()
+
+assert others(before) == others(after), "other skills changed!\n%r\n%r" % (others(before), others(after))
+assert "OLD one-liner" not in after and "OLD body that must be replaced" not in after, "ours not replaced"
+assert "The skill is user-invoked" in after, "our new body missing"
+assert after.count("#### statusline-designer Use Case") == 1, "duplicate use-case block"
+assert after.index("- [statusline-designer]") < after.index("- [other-skill-a]"), "bullet order changed"
+assert "## License\n\nMIT." in after, "trailing sections mangled"
+
+pub.merge_skill_into_readme(work, "statusline-designer", entry)          # idempotent?
+assert io.open(work, encoding="utf-8").read() == after, "second merge changed the file"
+
+# a registry that does not list this skill yet: append, never disturb the others
+missing = os.path.join(tmp, "registry-missing.md")
+base = """# agent-skills
+
+## Skills
+
+- [other-skill-a](#other-skill-a-use-case) - keep me exactly as I am.
+- [other-skill-b](#other-skill-b-use-case) - and me.
+
+### Use Case
+
+#### other-skill-a Use Case
+
+Body A, untouched.
+
+#### other-skill-b Use Case
+
+Body B, untouched.
+
+## License
+
+MIT.
+"""
+io.open(missing, "w", encoding="utf-8").write(base)
+pub.merge_skill_into_readme(missing, "statusline-designer", entry)
+grown = io.open(missing, encoding="utf-8").read()
+assert others(base) == others(grown), "other skills changed on append"
+assert "- [statusline-designer]" in grown and "#### statusline-designer Use Case" in grown, "not appended"
+EOF
+python3 - "$ROOT" <<'EOF' && ok "entry parser rejects a mismatched skill name" || bad "parser accepted a bad entry"
+import importlib.util, io, os, sys
+root = sys.argv[1]
+spec = importlib.util.spec_from_file_location("pub", os.path.join(root, "tools/publish_agent_artifact_pr.py"))
+pub = importlib.util.module_from_spec(spec); spec.loader.exec_module(pub)
+entry = io.open(os.path.join(root, "docs/registry/statusline-designer.md"), encoding="utf-8").read()
+try:
+    pub.parse_readme_entry(entry, "not-this-skill")
+except SystemExit:
+    raise SystemExit(0)
+raise SystemExit("parse_readme_entry should have exited")
+EOF
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" = 0 ]
