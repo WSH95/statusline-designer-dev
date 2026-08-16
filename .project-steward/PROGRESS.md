@@ -2,6 +2,16 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-08-16T09:50Z — committed, pushed, and published as agent-skills PR #4
+Committed the user-invocation + launcher work as 755c66e and pushed to origin/main
+(user approved). Added README feature bullets for the two apply buttons and the
+with-or-without-an-agent entry points, then ran the publish script: it opened
+https://github.com/WSH95/agent-skills/pull/4 (branch
+`publish/statusline-designer-20260816-094710`, +294/-124 over 6 files) and refreshed the
+registry README `## Skills` entry from `docs/registry/statusline-designer.md`. Correction
+to earlier state: PR #1 had already been MERGED upstream, so #4 is an incremental update
+rather than a competing publish. Never merged by the agent.
+
 ### 2026-08-16T00:30Z — Apply keeps the designer open; new Apply & Close button
 Corrected the launcher's close semantics after the user found the real-use problem:
 clicking Apply killed the designer, so there was no way to look at the result and keep

@@ -1,9 +1,9 @@
 ---
-updated_at: 2026-08-16T00:00:00Z
+updated_at: 2026-08-16T09:50:00Z
 updated_by: claude
 session_status: closed
 branch: main
-last_commit: 7889590 chore(steward): wrap - push dev repo to origin/main
+last_commit: 755c66e feat(skill): make statusline-designer user-invoked and add a standalone launcher
 ---
 # Handoff
 
@@ -13,9 +13,9 @@ another device). Keep every section current at wrap-up.
 ## Now
 
 **The skill is now USER-INVOKED and has a standalone launcher the page can close.
-Those changes are complete and verified but UNCOMMITTED.** It is also published
-to the agent-skills registry via an OPEN PR (#1), from a Claude-Code-only skill
-development repo with a build + publish pipeline.
+Committed as 755c66e and pushed to origin/main; shipped to the agent-skills
+registry as OPEN PR #4.** This is a Claude-Code-only skill development repo with a
+build + publish pipeline.
 
 - 2026-08-16: `SKILL.md` carries `disable-model-invocation: true` + a human-facing
   one-line description, so only `/statusline-designer` reaches it (the agent can no
@@ -31,11 +31,12 @@ development repo with a build + publish pipeline.
   `STATUSLINE_CAN_CLOSE` (set only by the launcher) is published as `BOOT.canClose`, so a
   bare `server.py` hides the button. No idle timeout — Ctrl-C is the other exit. ADR 0005.
 
-- **Open PR (NOT merged):** https://github.com/WSH95/agent-skills/pull/1 — branch
-  `publish/statusline-designer-20260708-164117`. It adds the payload at
-  **`skills/statusline-designer/`** (10 files) and fills the registry README's
-  `## Skills` section (use-case text + the demo GIF via this repo's raw URL).
+- **Open PR (NOT merged):** https://github.com/WSH95/agent-skills/pull/4 — branch
+  `publish/statusline-designer-20260816-094710`, +294/-124 across 6 files (SKILL.md,
+  the new `open_designer.py`, `server.py`, `index.html`, `main.js`, registry README).
   Review and merge on GitHub. **An agent must not merge it.**
+  PR #1 (the original publish) was MERGED upstream, so #4 is an incremental update on
+  top of it — not a duplicate.
 - Layout: `skill-src/statusline-designer/` (canonical source, byte-identical),
   `tools/` (build/publish/verify/capture), `dist/` (gitignored build output),
   `docs/` (README media + `docs/registry/statusline-designer.md` = the registry
@@ -49,20 +50,21 @@ development repo with a build + publish pipeline.
 
 ## In flight
 
-- **10 modified files + 1 untracked (`scripts/open_designer.py`), all uncommitted.**
-  Proposed commit: `feat(skill): make statusline-designer user-invoked and add a
-  self-closing launcher` (include `.project-steward/`). Nothing pushed since 7889590.
+- Nothing local. Working tree clean, `origin/main` in sync at 755c66e (user approved
+  the push), registry PR #4 open for review.
 - All servers torn down; `~/.claude` untouched (settings.json's 2026-08-16 mtime is
   from a plugin install, not this work). `dist/` rebuilt (gitignored).
 
 ## Next steps
 
-1. **Commit the working tree** (see In flight). Then, to use the new version locally,
-   copy `dist/statusline-designer/` over `~/.claude/skills/statusline-designer/` —
-   the installed copy is still the old model-invoked one.
-2. **Review + merge PR #1** on GitHub. After merge, confirm once that
-   `npx skills add WSH95/agent-skills@statusline-designer` resolves the skill now
-   that it lives under `skills/` (that CLI selects by skill name).
+1. **Review + merge PR #4** on GitHub (an agent must not merge it). After merge, confirm
+   once that `npx skills add WSH95/agent-skills@statusline-designer` resolves the skill
+   (that CLI selects by skill name).
+2. To use the new version locally, copy `dist/statusline-designer/` over
+   `~/.claude/skills/statusline-designer/` — the installed copy is still the old
+   model-invoked one, so `/statusline-designer` and the two apply buttons are not live
+   for the user yet. Doing so also retires verify.sh §1's baseline (it diffs the new
+   `generate.py` against the installed one).
 3. Re-publish after a skill change (this one qualifies): `python3 tools/build_skill_payloads.py` then
    `python3 tools/publish_agent_artifact_pr.py` — opens a NEW timestamped branch/PR
    each run (skips if the payload has no diff).
@@ -88,7 +90,8 @@ development repo with a build + publish pipeline.
 - `docs/registry/statusline-designer.md` — the registry README `## Skills` section
   (follows agent-skills' template verbatim; embeds the demo GIF by raw URL; uses the
   real skill name).
-- `tools/verify.sh` — sandboxed suite, 46 checks (§9 = agentless launcher). `README.md` + `docs/` — front page + media.
+- `tools/verify.sh` — sandboxed suite, 55 checks (§9 = the two-phase agentless launcher
+  test). `README.md` + `docs/` — front page + media.
 
 ## Tried and rejected
 
