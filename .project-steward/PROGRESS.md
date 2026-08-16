@@ -2,6 +2,19 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-08-16T10:35Z — installed the new version to ~/.claude/skills
+Backed the old install up to `~/.claude/skills-backup/statusline-designer-20260816/`
+(10 files, byte-identical to what was published — `generate.py` matched, so no hand edits
+were lost), then `rsync -a --delete dist/statusline-designer/ ~/.claude/skills/...`.
+Installed tree is identical to `dist/`. Smoke-tested from the installed path against a
+sandbox data dir/out/settings: the page serves the Apply & Close button with
+`canClose: true`, plain Apply keeps the server up, `?close=1` exits it, and the generated
+script renders the user's real layout. The user's `~/.claude/settings.json` and status
+line were not modified. Note for verify.sh §1: its default baseline
+(`~/.claude/skills/statusline-designer`) is now the NEW code, so run it as
+`OLD_SKILL=~/.claude/skills-backup/statusline-designer-20260816 bash tools/verify.sh`
+for a meaningful old-vs-new comparison (57/57 green that way).
+
 ### 2026-08-16T10:15Z — fixed a destructive registry-README upsert; repaired PR #4
 The user caught that PR #4 deleted the `paper-polish-standalone` and
 `paper-review-standalone` entries from the agent-skills README. Cause:

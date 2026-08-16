@@ -1,5 +1,5 @@
 ---
-updated_at: 2026-08-16T10:20:00Z
+updated_at: 2026-08-16T10:35:00Z
 updated_by: claude
 session_status: closed
 branch: main
@@ -61,11 +61,10 @@ build + publish pipeline.
 1. **Review + merge PR #4** on GitHub (an agent must not merge it). After merge, confirm
    once that `npx skills add WSH95/agent-skills@statusline-designer` resolves the skill
    (that CLI selects by skill name).
-2. To use the new version locally, copy `dist/statusline-designer/` over
-   `~/.claude/skills/statusline-designer/` — the installed copy is still the old
-   model-invoked one, so `/statusline-designer` and the two apply buttons are not live
-   for the user yet. Doing so also retires verify.sh §1's baseline (it diffs the new
-   `generate.py` against the installed one).
+2. DONE 2026-08-16: the new payload is installed at `~/.claude/skills/statusline-designer/`
+   (old copy backed up to `~/.claude/skills-backup/statusline-designer-20260816/`).
+   `/statusline-designer` appears after a Claude Code restart, since a user-invoked skill
+   is picked up at startup.
 3. Re-publish after a skill change (this one qualifies): `python3 tools/build_skill_payloads.py` then
    `python3 tools/publish_agent_artifact_pr.py` — opens a NEW timestamped branch/PR
    each run (skips if the payload has no diff).
@@ -107,8 +106,11 @@ build + publish pipeline.
 ## Warnings
 
 - **The PR must not be merged by an agent** — review/merge is the user's.
-- **verify.sh §1 compares against the INSTALLED old skill** — it stays meaningful only
-  while `generate.py` rendering is unchanged (this change did not touch it).
+- **verify.sh §1's default baseline is now the NEW code** (the install was updated), so it
+  self-compares. Run it as
+  `OLD_SKILL=~/.claude/skills-backup/statusline-designer-20260816 bash tools/verify.sh`
+  for a real old-vs-new check; delete that backup only when the baseline is no longer
+  wanted.
 - **Publish is outward-facing**: needs `gh` auth; opens a PR, never merges; `--dry-run` first.
 - **The registry README is SHARED with other people's skills.** Publishing must only ever
   touch this skill's own bullet and its `#### statusline-designer Use Case` block
