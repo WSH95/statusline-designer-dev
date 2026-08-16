@@ -2,6 +2,40 @@
 
 Newest first. One short entry per semantic checkpoint — not per edit.
 
+### 2026-08-16T00:30Z — Apply keeps the designer open; new Apply & Close button
+Corrected the launcher's close semantics after the user found the real-use problem:
+clicking Apply killed the designer, so there was no way to look at the result and keep
+adjusting. The close decision now belongs to the page — **Apply to Terminal** applies and
+keeps serving, the new secondary **Apply & Close** posts `/apply?close=1`, which makes
+`server.py` drop a `close.request` marker that the launcher claims and stops on.
+`STATUSLINE_CAN_CLOSE` (launcher-only) is published as `BOOT.canClose`, so a bare
+`server.py` hides the button entirely. `--keep-open` dropped — watching is now the only
+mode, ended by the page or Ctrl-C; no idle timeout by choice. verify.sh 55/55: section 9
+is a two-phase regression test for exactly this bug (plain Apply -> still serving;
+Apply & Close -> exits, port dead), section 5 proves a bare server ignores `?close=1`.
+Also caught a self-inflicted test bug: new assertions pointed at `$TMP/data4` while the
+launcher writes `data5`, so three checks would have passed vacuously. Headless-Chrome
+click-through of both buttons confirms the messages, button states and process exit.
+
+### 2026-08-16T00:05Z — [auto-checkpoint]
+User-invoked skill + self-closing launcher complete and verified (46/46); working tree uncommitted, HANDOFF.md refreshed.
+
+### 2026-08-16T00:00Z — user-invoked skill + self-closing agentless launcher
+Made `statusline-designer` user-invoked (`disable-model-invocation: true`, description
+demoted to a human-facing one-liner) and added `scripts/open_designer.py`: one command
+serves the composer, opens the browser, waits for Apply, runs generate + apply_settings,
+then shuts the server down and exits (`--keep-open` loops; `--port`/`--no-browser`/
+`--data-dir`/`--out`/`--settings` for sandboxing). SKILL.md's agent workflow now
+delegates to that script, so both paths share one implementation. Added an
+apply-then-close handshake (`STATUSLINE_EXIT_AFTER_APPLY` -> `{"ok":true,"shutdown":…}`)
+so the page ends in a final state instead of re-arming Apply against a closed port.
+Two bugs found and fixed while testing: the launcher crashed with FileNotFoundError when
+`choice.json` vanished mid-apply (now claims the layout into a private snapshot first),
+and a PRE-EXISTING verify.sh flake — `resets_at` sat exactly on a countdown boundary, so
+section 1's two renders disagreed by a minute in ~33% of runs. Verified: verify.sh 46/46
+across 8 consecutive runs, headless-Chrome click-through shows "the designer has closed"
+with Apply left disabled, `~/.claude` untouched throughout.
+
 ### 2026-07-08T19:20Z — pushed dev repo to origin/main (user approved at session end)
 Pushed the restructure + publish commits (through this steward wrap) to
 `origin/main`; the dev repo is in sync. PR #1 to agent-skills stays open for the

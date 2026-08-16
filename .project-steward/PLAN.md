@@ -56,10 +56,29 @@ holds milestones + a pointer only (never a duplicate task list).
       entry + demo GIF via raw URL) and a README upsert to the publish script
 - [x] Opened PR #1 (https://github.com/WSH95/agent-skills/pull/1) — never merged
 
+## User-invoked skill + agentless launcher (2026-08-16)
+
+- [x] `scripts/open_designer.py`: serve -> browser -> generate + apply_settings on every
+      Apply, until the page says stop (`--port` / `--no-browser` / `--data-dir` /
+      `--out` / `--settings`)
+- [x] Two apply buttons: **Apply to Terminal** keeps the designer open for more tweaking;
+      **Apply & Close** posts `?close=1` -> `close.request` marker -> launcher stops.
+      `STATUSLINE_CAN_CLOSE` -> `BOOT.canClose` hides the button when no launcher is
+      watching; `/apply` returns `{"ok":true,"shutdown":…}` so the page ends correctly
+- [x] SKILL.md: `disable-model-invocation: true` + human-facing one-line description;
+      workflow delegates to the launcher (one code path)
+- [x] Plumbing: launcher in the build's REQUIRED list; verify.sh section 9 is now a
+      two-phase regression test (plain Apply keeps serving; Apply & Close exits), and
+      section 5 proves a bare server.py ignores `?close=1`
+- [x] Fixed a pre-existing verify.sh flake: `resets_at` sat exactly on a countdown
+      boundary, so section 1's two renders could differ by a minute (~33% of runs)
+- [x] Docs: README (slash-command + no-agent sections), registry entry
+- [x] Verify: verify.sh 55/55; headless-Chrome click-through of BOTH buttons confirms
+      keep-open then close-and-exit; `~/.claude` untouched
+
 ## Later
 
-- [ ] Optional: run skill-creator's description-optimization loop - it auto-generates
-      ~20 realistic should/should-not-trigger prompts, measures how reliably the
-      SKILL.md `description` makes Claude invoke the skill, and iteratively rewrites
-      it. Current description (inherited from tuned v3) already triggers well; run
-      only if mis-triggering is ever observed.
+- [~] Obsolete as of 2026-08-16: skill-creator's description-optimization loop tunes a
+      model-facing trigger description. The skill is user-invoked now
+      (`disable-model-invocation: true`), so its description is human-facing only.
+      Revisit only if model invocation is ever restored.

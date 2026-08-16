@@ -11,21 +11,25 @@ TMP="$(mktemp -d /tmp/sbc-verify-XXXXXX)"
 PASS=0; FAIL=0
 ok()  { echo "  ok   $1"; PASS=$((PASS+1)); }
 bad() { echo "  FAIL $1"; FAIL=$((FAIL+1)); }
-cleanup() { [ -n "${SRV_PID:-}" ] && kill "$SRV_PID" 2>/dev/null; rm -rf "$TMP"; }
+cleanup() { [ -n "${SRV_PID:-}" ] && kill "$SRV_PID" 2>/dev/null
+            [ -n "${LAUNCH_PID:-}" ] && kill "$LAUNCH_PID" 2>/dev/null
+            rm -rf "$TMP"; }
 trap cleanup EXIT
 
 echo "== 0. python syntax =="
-for f in server.py generate.py apply_settings.py; do
+for f in server.py generate.py apply_settings.py open_designer.py; do
   PYTHONDONTWRITEBYTECODE=1 python3 -m py_compile "$SKILL/scripts/$f" 2>/dev/null && ok "$f compiles" || bad "$f does not compile"
 done
 
 now=$(date +%s)
+# reset times sit ~30s/~30min past a display boundary: the countdown text ("2h11m") must
+# not tick between two renders taken seconds apart, or equivalence checks flake.
 PAYLOAD_RICH() { cat <<EOF
 {"session_id":"$1","cwd":"$TMP","transcript_path":"$TMP/none.jsonl",
  "model":{"id":"claude-opus-4-8","display_name":"Opus 4.8"},
  "workspace":{"current_dir":"$TMP","project_dir":"$TMP"},
  "context_window":{"used_percentage":24,"remaining_percentage":76,"total_input_tokens":48000,"context_window_size":200000},
- "rate_limits":{"five_hour":{"used_percentage":62,"resets_at":$((now+7860))},"seven_day":{"used_percentage":28,"resets_at":$((now+270000))}},
+ "rate_limits":{"five_hour":{"used_percentage":62,"resets_at":$((now+7890))},"seven_day":{"used_percentage":28,"resets_at":$((now+271800))}},
  "cost":{"total_cost_usd":0.42,"total_duration_ms":723000,"total_api_duration_ms":2300,"total_lines_added":156,"total_lines_removed":23},
  "effort":{"level":"max"},"thinking":{"enabled":true},"version":"2.1.90"}
 EOF
@@ -97,8 +101,12 @@ grep -q 'window.BOOT = {' "$TMP/page.html" && ok "BOOT injected" || bad "BOOT no
 grep -q '__BOOT__' "$TMP/page.html" && bad "__BOOT__ placeholder leaked" || ok "no placeholder leak"
 code=$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' --path-as-is "http://127.0.0.1:$PORT/../server.py")
 [ "$code" = 404 ] && ok "path traversal blocked" || bad "path traversal -> $code"
-curl -s --noproxy '*' -X POST -H 'Content-Type: application/json' --data-binary @"$TMP/v4.json" "http://127.0.0.1:$PORT/apply" >/dev/null
+grep -qE '"canClose": ?false' "$TMP/page.html" && ok "BOOT says close is unsupported here" || bad "canClose missing/true for a bare server"
+# a bare server.py has no launcher: a close request must be ignored, not half-honored
+curl -s --noproxy '*' -X POST -H 'Content-Type: application/json' --data-binary @"$TMP/v4.json" "http://127.0.0.1:$PORT/apply?close=1" -o "$TMP/apply.json"
 sleep 0.2
+grep -q '"shutdown":false' "$TMP/apply.json" && ok "bare server.py ignores ?close=1 (shutdown:false)" || bad "apply response wrong: $(cat "$TMP/apply.json")"
+[ ! -f "$TMP/data/close.request" ] && ok "no close.request written without a launcher" || bad "close.request written with no launcher"
 cmp -s "$TMP/data/choice.json" "$TMP/v4.json" && ok "POST /apply writes choice.json" || bad "choice.json wrong"
 cmp -s "$TMP/data/choice-applied.json" "$TMP/v4.json" && ok "choice-applied.json mirrored" || bad "choice-applied.json wrong"
 kill "$SRV_PID" 2>/dev/null; SRV_PID=""
@@ -130,7 +138,7 @@ else
   bad "build failed"; cat "$TMP/build.log"
 fi
 BP="$BUILD_OUT/statusline-designer"
-for f in SKILL.md scripts/server.py scripts/generate.py scripts/apply_settings.py scripts/ui/index.html scripts/ui/js/main.js; do
+for f in SKILL.md scripts/open_designer.py scripts/server.py scripts/generate.py scripts/apply_settings.py scripts/ui/index.html scripts/ui/js/main.js; do
   [ -f "$BP/$f" ] && ok "payload has $f" || bad "payload missing $f"
 done
 if find "$BP" \( -name '__pycache__' -o -name '*.pyc' \) 2>/dev/null | grep -q .; then bad "payload carries python cache"; else ok "payload is cache-clean"; fi
@@ -141,6 +149,54 @@ sleep 0.8
 code=$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' "http://127.0.0.1:$((PORT+2))/js/main.js")
 [ "$code" = 200 ] && ok "built payload serves from dist" || bad "built payload broken: $code"
 kill "$SRV_PID" 2>/dev/null; SRV_PID=""
+
+echo "== 9. agentless launcher, end to end (sandboxed) =="
+LPORT=$((PORT+3))
+mkdir -p "$TMP/data5"
+python3 "$SKILL/scripts/open_designer.py" --port "$LPORT" --no-browser \
+  --data-dir "$TMP/data5" --out "$TMP/cmd.py" --settings "$TMP/settings5.json" \
+  >"$TMP/launcher.log" 2>&1 &
+LAUNCH_PID=$!
+for _ in $(seq 40); do curl -s --noproxy '*' -o /dev/null "http://127.0.0.1:$LPORT/" && break; sleep 0.1; done
+curl -s --noproxy '*' -o "$TMP/page5.html" "http://127.0.0.1:$LPORT/"
+grep -qE '"canClose": ?true' "$TMP/page5.html" && ok "BOOT advertises close support under a launcher" || bad "canClose not advertised"
+
+# phase 1: plain Apply -> applied, and the designer MUST stay up for more tweaking
+curl -s --noproxy '*' -X POST -H 'Content-Type: application/json' --data-binary @"$TMP/v4.json" \
+  "http://127.0.0.1:$LPORT/apply" -o "$TMP/apply5a.json"
+grep -q '"shutdown":false' "$TMP/apply5a.json" && ok "plain Apply keeps the designer open" || bad "plain Apply response: $(cat "$TMP/apply5a.json")"
+for _ in $(seq 40); do [ -f "$TMP/cmd.py" ] && break; sleep 0.1; done
+sleep 0.5
+kill -0 "$LAUNCH_PID" 2>/dev/null && ok "launcher still running after plain Apply" || bad "launcher exited on plain Apply"
+[ -f "$TMP/cmd.py" ] && ok "plain Apply generated the script" || bad "plain Apply generated nothing"
+[ ! -f "$TMP/data5/choice.json" ] && ok "choice.json cleared after plain Apply" || bad "choice.json left behind"
+code=$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' "http://127.0.0.1:$LPORT/")
+[ "$code" = 200 ] && ok "still serving between Applies" || bad "not serving between Applies: $code"
+
+# phase 2: Apply & Close -> applied, then the launcher stops itself
+rm -f "$TMP/cmd.py"
+curl -s --noproxy '*' -X POST -H 'Content-Type: application/json' --data-binary @"$TMP/v4.json" \
+  "http://127.0.0.1:$LPORT/apply?close=1" -o "$TMP/apply5.json"
+grep -q '"shutdown":true' "$TMP/apply5.json" && ok "Apply & Close reports shutdown:true" || bad "shutdown flag missing: $(cat "$TMP/apply5.json")"
+for _ in $(seq 80); do kill -0 "$LAUNCH_PID" 2>/dev/null || break; sleep 0.1; done
+if kill -0 "$LAUNCH_PID" 2>/dev/null; then bad "launcher still running after Apply & Close"; head -5 "$TMP/launcher.log"
+else ok "launcher exits on its own after Apply & Close"; fi
+wait "$LAUNCH_PID" 2>/dev/null; LAUNCH_PID=""
+code=$(curl -s --noproxy '*' --max-time 2 -o /dev/null -w '%{http_code}' "http://127.0.0.1:$LPORT/")
+[ "$code" != 200 ] && ok "server shut down (port closed)" || bad "server still serving after exit"
+launched=$(cd "$TMP" && PAYLOAD="$(PAYLOAD_RICH launch9)" && printf '%s' "$PAYLOAD" | python3 "$TMP/cmd.py" 2>/dev/null)
+echo "$launched" | grep -q "62%" && ok "generated script renders" || bad "generated script missing/broken"
+python3 - "$TMP/settings5.json" "$TMP/cmd.py" <<'EOF' && ok "settings.json wired to the generated script" || bad "settings not wired"
+import json, sys
+s = json.load(open(sys.argv[1]))
+assert s["statusLine"]["type"] == "command"
+assert s["statusLine"]["command"] == "python3 " + sys.argv[2], s["statusLine"]["command"]
+assert s["statusLine"]["refreshInterval"] == 1
+EOF
+[ ! -f "$TMP/data5/choice.json" ] && ok "choice.json cleared after Apply & Close" || bad "choice.json left behind"
+[ ! -f "$TMP/data5/close.request" ] && ok "close.request consumed" || bad "close.request left behind"
+cmp -s "$TMP/data5/choice-applied.json" "$TMP/v4.json" && ok "choice-applied.json mirrored" || bad "choice-applied.json wrong"
+grep -q "Designer closed." "$TMP/launcher.log" && ok "launcher reports the close" || bad "no close message: $(tail -2 "$TMP/launcher.log")"
 
 echo
 echo "RESULT: $PASS passed, $FAIL failed"

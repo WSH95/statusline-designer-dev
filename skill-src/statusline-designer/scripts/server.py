@@ -9,6 +9,7 @@ re-hydrates the designer with the user's current status line.
 """
 import json, os, getpass, socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs
 
 # Writable per-user data dir (holds the chosen layout), kept in the user's home so the
 # skill works no matter where its scripts are installed. Both overridable via env vars.
@@ -16,7 +17,12 @@ DATA_DIR = os.path.expanduser(os.environ.get("STATUSLINE_DATA_DIR", "~/.claude/s
 os.makedirs(DATA_DIR, exist_ok=True)
 CHOICE_FILE = os.path.join(DATA_DIR, "choice.json")           # written on Apply; signals the parent
 APPLIED_FILE = os.path.join(DATA_DIR, "choice-applied.json")  # last applied layout; re-hydrates the page
+CLOSE_FILE = os.path.join(DATA_DIR, "close.request")          # "Apply & Close": tells the parent to stop
 PORT = int(os.environ.get("STATUSLINE_PORT", "8765"))
+# open_designer.py sets this: a launcher is watching and will honor a close request.
+# Run bare (no launcher) it stays off, so the page hides Apply & Close - nothing could
+# act on it, and the button would only strand the user on a dead port.
+CAN_CLOSE = os.environ.get("STATUSLINE_CAN_CLOSE", "0") == "1"
 
 UI_DIR = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ui"))
 
@@ -46,6 +52,7 @@ def boot_json():
         "cwd": {"tilde": tilde, "base": os.path.basename(cwd.rstrip(os.sep)) or cwd, "full": cwd},
         "model": {"ver": "Opus 4.8", "name": "Opus 4.8", "id": "claude-opus-4-8"},
         "applied": applied,
+        "canClose": CAN_CLOSE,      # is anyone listening for "Apply & Close"?
     })
     return boot.replace("<", "\\u003c")  # safe inside a <script> block
 
@@ -81,11 +88,16 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, open(full, "rb").read(), MIME.get(ext, "application/octet-stream"))
 
     def do_POST(self):
-        if self.path != "/apply":
+        path, _, query = self.path.partition("?")
+        if path != "/apply":
             self._send(404, b"not found", "text/plain; charset=utf-8")
             return
+        # "Apply & Close" posts ?close=1; plain Apply leaves the designer running.
+        closing = CAN_CLOSE and parse_qs(query).get("close", ["0"])[0] == "1"
         length = int(self.headers.get("Content-Length", 0))
         data = self.rfile.read(length)
+        if closing:                            # before choice.json: the parent wakes on
+            open(CLOSE_FILE, "wb").close()     # that file and must already see this one
         with open(CHOICE_FILE, "wb") as f:
             f.write(data)
         try:                                   # persist the layout so the web re-hydrates from it
@@ -93,12 +105,14 @@ class Handler(BaseHTTPRequestHandler):
                 f.write(data)
         except Exception:
             pass
-        self._send(200, b'{"ok":true}', "application/json")
+        body = b'{"ok":true,"shutdown":%s}' % (b"true" if closing else b"false")
+        self._send(200, body, "application/json")
 
 
 if __name__ == "__main__":
-    if os.path.exists(CHOICE_FILE):
-        os.remove(CHOICE_FILE)
+    for stale in (CHOICE_FILE, CLOSE_FILE):
+        if os.path.exists(stale):
+            os.remove(stale)
     print("Status line designer: http://localhost:%d   (Ctrl-C to stop; data dir: %s)"
           % (PORT, DATA_DIR), flush=True)
     HTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

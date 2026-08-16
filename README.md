@@ -35,6 +35,11 @@ then flip between light and dark:
   context-window %, 5-hour & 7-day usage limits, effort level, session cost, cumulative
   input/output/cache tokens, a live clock, and more.
 - **Two-line arrangement dock** — drag chips to reorder fields or split across two lines.
+- **Apply as often as you like** — *Apply to Terminal* writes the script and updates
+  `settings.json` while leaving the designer open, so you can see the result and keep
+  adjusting; *Apply & Close* applies and shuts the local server down.
+- **Works with or without an agent** — type `/statusline-designer` in Claude Code, or run
+  `scripts/open_designer.py` yourself and drive the whole flow from the browser.
 - **Export** the design as JSON. **100% local** — vanilla HTML/CSS/JS served by a
   stdlib `python3` server; no external requests.
 
@@ -54,17 +59,21 @@ you'll also be able to install it with:
 npx skills add WSH95/agent-skills@statusline-designer
 ```
 
-Then in Claude Code, say something like *"design my status line"* or *"show git branch
-and context % in my status bar"*. The skill starts the designer, hands you the URL, and
+Then in Claude Code, type **`/statusline-designer`**. The skill opens the designer, and
 on **Apply** generates the script and updates `settings.json` for you. Re-run it anytime
 to tweak — it re-hydrates from your current layout.
 
-**Run the designer directly.**
+**Run it without an agent.** One command does the whole job — serves the UI, opens your
+browser, and applies every design you send it:
 
 ```bash
-python3 skill-src/statusline-designer/scripts/server.py
-# open http://localhost:8765
+python3 ~/.claude/skills/statusline-designer/scripts/open_designer.py
 ```
+
+**Apply to Terminal** applies and leaves the designer open, so you can see the result and
+keep adjusting; **Apply & Close** applies and shuts the server down (so does Ctrl-C).
+`--port`, `--no-browser`, `--data-dir`, `--out` and `--settings` cover the rest
+(`--help` lists them).
 
 ## How it works
 
@@ -87,6 +96,7 @@ payloads are **built into `dist/`**, and shipped as pull requests to the
 
 ```
 skill-src/statusline-designer/     # canonical skill source (the drop-in: SKILL.md + scripts/)
+  scripts/open_designer.py         # standalone entry point: serve -> Apply -> generate -> close
   scripts/server.py                # serves the composer UI
   scripts/ui/                      # vanilla HTML/CSS/JS (ring, preview, dock)
   scripts/generate.py              # choice.json  ->  status-line script

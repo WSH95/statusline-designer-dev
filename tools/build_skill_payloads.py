@@ -29,6 +29,7 @@ PRUNE_FILE_GLOBS = ("*.pyc", "*.pyo", ".DS_Store")
 # Files every skill payload must contain (relative to the skill directory).
 REQUIRED = (
     "SKILL.md",
+    "scripts/open_designer.py",
     "scripts/server.py",
     "scripts/generate.py",
     "scripts/apply_settings.py",

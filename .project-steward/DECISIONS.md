@@ -52,3 +52,33 @@ PR now that `gh` is authenticated; the script still never merges.
 **Consequences**: `npx skills add WSH95/agent-skills@statusline-designer` resolves a
 skill under `skills/`; the registry README gains a concise, on-template use-case
 entry with the animated demo; no binaries are duplicated into the registry.
+
+## 0005 — 2026-08-16 — User-invoked skill + a self-closing agentless launcher
+
+**Context**: The skill was model-invoked: a ~120-word trigger description sat in every
+agent context so phrases like "show git branch in my status line" fired it. The user
+asked for user invocation (referencing `mattpocock-skills:writing-for-agents` →
+`SKILL-MECHANICS.md`) plus a way to reach the web designer with no agent at all, and for
+the server to close itself when the user is done. A first cut closed after the *first*
+Apply; in use that was wrong — it killed the designer before the user could look at the
+result and keep adjusting.
+**Decision**: Set `disable-model-invocation: true` and demote `description` to a
+human-facing one-liner — the skill fires only when the user types
+`/statusline-designer`. Add `scripts/open_designer.py` as the single entry point:
+serve → open browser → apply every design the page sends, until the page says stop.
+SKILL.md's agent workflow delegates to that same script, so the manual and agent paths
+share one code path. **The close decision belongs to the page, not the launcher**: the UI
+has two buttons — *Apply to Terminal* (apply, keep designing) and *Apply & Close* (apply,
+then stop) — the latter posting `/apply?close=1`, which makes `server.py` drop a
+`close.request` marker beside `choice.json` for the launcher to claim. `server.py` reads
+`STATUSLINE_CAN_CLOSE` (set only by the launcher) and publishes it as `BOOT.canClose`, so
+a bare `server.py` hides a button nothing could act on; its `/apply` response carries
+`shutdown` so the page ends on a final state rather than re-arming against a dead port.
+The launcher claims `choice.json` (read + remove + private snapshot) before generating, so
+a second Apply or a second launcher cannot pull the file out from under the generators.
+No idle timeout: the designer lives until Apply & Close or Ctrl-C.
+**Consequences**: Zero always-loaded context cost, at the price of discoverability — the
+agent can no longer propose the skill, and the harness omits it from the injected skill
+list, so it is reachable only by name. The README and registry entry now advertise the
+slash command and the standalone command instead of natural-language triggers.
+Re-publishing to agent-skills will open a NEW PR (#1 is still open, unmerged).

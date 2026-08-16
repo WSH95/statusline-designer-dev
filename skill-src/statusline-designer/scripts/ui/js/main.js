@@ -667,25 +667,35 @@ window.SBC = window.SBC || {};
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
     });
 
-    $("applyBtn").addEventListener("click", async () => {
-      const btn = $("applyBtn"), status = $("applyStatus");
-      btn.disabled = true;
+    // Apply keeps the designer running so you can keep tweaking; Apply & Close is the
+    // same POST plus ?close=1, which tells the launcher to stop after applying.
+    async function doApply(closing) {
+      const btn = $("applyBtn"), closeBtn = $("applyCloseBtn"), status = $("applyStatus");
+      btn.disabled = closeBtn.disabled = true;
       status.textContent = "Applying…";
       try {
-        const res = await fetch("/apply", {
+        const res = await fetch(closing ? "/apply?close=1" : "/apply", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(buildChoice()),
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
-        status.innerHTML = '<span class="ok">Applied.</span> Switch back to your terminal.';
+        const info = await res.json().catch(() => ({}));
+        if (info.shutdown) {   // server is stopping; nothing left to post to
+          status.innerHTML = '<span class="ok">Applied.</span> The designer has closed, you can close this tab.';
+          return;              // both buttons stay disabled
+        }
+        status.innerHTML = '<span class="ok">Applied.</span> Keep tweaking, or Apply &amp; Close when you are done.';
       } catch (err) {
         status.textContent = "Could not apply: " + err.message + ". Try again.";
-        btn.disabled = false;
-        return;
       }
-      setTimeout(() => { btn.disabled = false; }, 1200);
-    });
+      setTimeout(() => { btn.disabled = closeBtn.disabled = false; }, 1200);
+    }
+
+    $("applyBtn").addEventListener("click", () => doApply(false));
+    $("applyCloseBtn").addEventListener("click", () => doApply(true));
+    // no launcher watching -> nothing could act on a close request
+    if (!S.BOOT.canClose) $("applyCloseBtn").hidden = true;
 
     // click a preview segment -> rotate to its card
     $("termStatus").addEventListener("click", (e) => {
